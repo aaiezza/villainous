@@ -56,7 +56,7 @@ data class Strength(val value: Int) {
 }
 
 interface VillainCard : Card {
-    companion object Standard {
+    object Standard {
         data class Effect(
             override val name: Card.Name,
             override val description: Card.Description,
@@ -127,7 +127,12 @@ interface FateCard : Card {
         data class Item internal constructor(
             override val name: Card.Name,
             override val description: Card.Description,
-        ) : VillainCard, Card.Placeable.ToLocation, Card.Placeable.ToCard
+            val effect: Effect? = null
+        ) : VillainCard, Card.Placeable.ToLocation, Card.Placeable.ToCard{
+            interface Effect {
+                data class AddStrengthToHero(val strength: Strength) : Effect
+            }
+        }
 
         val ITEM = ::Item
     }
