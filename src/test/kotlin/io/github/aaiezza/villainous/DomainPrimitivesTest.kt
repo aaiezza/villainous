@@ -1,7 +1,10 @@
 package io.github.aaiezza.villainous
 
-class TestExample {
-    companion object {
-        val villainousBoard = VillainousBoard("test")
+import org.junit.jupiter.api.Test
+
+class DomainPrimitivesTest {
+    @Test
+    fun `should create a board`() {
+
     }
 }
