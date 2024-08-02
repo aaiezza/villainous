@@ -38,6 +38,10 @@ data class Game private constructor(val initialGameState: State) {
             ) = State(players.associateWith { getVillainBoard(it.villainCharacterName)() }
                 .markPlayerAsActive(players[startingPlayerIndex]))
         }
+
+        interface Mover {
+            fun apply(gameState: State): State
+        }
     }
 }
 
