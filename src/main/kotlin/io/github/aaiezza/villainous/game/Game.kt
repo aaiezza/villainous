@@ -9,6 +9,9 @@ typealias Players = Map<Game.Player, Board>
 data class Game private constructor(val initialGameState: State) {
     val history = listOf(initialGameState)
 
+    val currentState: Game.State
+        get() = history.last()
+
     constructor (
         players: List<Player.Inactive>, startingPlayerIndex: Int = 0
     ) : this(State.initializeGameState(players, startingPlayerIndex))
@@ -37,14 +40,13 @@ data class Game private constructor(val initialGameState: State) {
                 players: List<Player>, startingPlayerIndex: Int
             ) = State(players.associateWith { getVillainBoard(it.villainCharacterName)() }
                 .markPlayerAsActive(players[startingPlayerIndex]))
+                .let { GiveInitialPower.apply(it) }
         }
 
-        interface Mover {
+        fun interface Mover {
             fun apply(gameState: State): State
         }
     }
 }
 
-
-
-
+data class PlayerAndBoard(val player: Game.Player, val board: Board)
