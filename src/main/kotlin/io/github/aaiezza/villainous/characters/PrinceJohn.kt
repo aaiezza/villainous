@@ -11,7 +11,6 @@ import io.github.aaiezza.villainous.Card.Description
 import io.github.aaiezza.villainous.Card.Name
 import io.github.aaiezza.villainous.Realm.Location
 
-
 class PrinceJohnBoardGenerator : CharacterBoardGenerator {
     override fun invoke(): Board {
         return Board(
