@@ -98,9 +98,9 @@ interface VillainCard : Card {
         val CONDITION = ::Condition
     }
 
-    data class Hand(val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
+    data class Hand(private val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
     data class Deck(private val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
-    data class DiscardPile(val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
+    data class DiscardPile(private val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
 
 }
 
@@ -138,7 +138,7 @@ interface FateCard : Card {
     }
 
     data class Deck(private val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
-    data class DiscardPile(val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
+    data class DiscardPile(private val value: List<VillainCard> = emptyList()) : List<VillainCard> by value
 }
 
 class FateToken
