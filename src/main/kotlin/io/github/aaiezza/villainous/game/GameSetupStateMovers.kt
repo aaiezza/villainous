@@ -1,27 +1,26 @@
 package io.github.aaiezza.villainous.game
 
 import io.github.aaiezza.villainous.Power
+import io.github.aaiezza.villainous.mapIndexed
+import io.github.aaiezza.villainous.mapIndexedToPlayers
 
 val DealInitialHand = Game.State.Mover { gameState ->
+
+
     gameState
 }
 
 val GiveInitialPower = Game.State.Mover { game ->
     game.copy(
         players =
-        game.players.toList()
-            // TODO: create a way to map over entries with the index
-            // TODO: whenever starting to iterate over the players, always start with the Active one, and go on from there
+        game.players
             .filter {
-                // TODO: remove this filter. Just for debugging
-                println(it)
+//                println(it)
                 true
             }
-            .mapIndexed { i, (player, board) ->
-            if (game.getActivePlayerBoard().player == player) {
+            .mapIndexedToPlayers { i, (player, board) ->
                 player to board.copy(powerTokens = INITIAL_POWER_AMOUNTS[i]?.plus(board.powerTokens) ?: error(""))
-            } else player to board
-        }.toMap()
+            }
     )
 }
 

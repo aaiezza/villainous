@@ -17,7 +17,7 @@ class GameTest {
                 "Maleficent".asVillainousPlayer("2".asUsername()),
                 "Prince John".asVillainousPlayer("3".asUsername()),
                 "Maleficent".asVillainousPlayer("4".asUsername()),
-            )
+            ), 2
         )
     }
 
