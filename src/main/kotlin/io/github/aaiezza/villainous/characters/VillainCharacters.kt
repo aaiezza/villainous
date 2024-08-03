@@ -10,7 +10,8 @@ fun getVillainBoard(villainCharacterName: VillainCharacter.Name): CharacterBoard
     when (villainCharacterName) {
         VillainCharacter.Name("Prince John") -> PrinceJohnBoardGenerator()
         VillainCharacter.Name("Maleficent") -> MaleficentBoardGenerator()
-        VillainCharacter.Name("Captain Hook") -> MaleficentBoardGenerator()
+        VillainCharacter.Name("Captain Hook") -> CaptainHookBoardGenerator()
+        VillainCharacter.Name("Jafar") -> JafarBoardGenerator()
         else -> throw IllegalArgumentException("Villain Character `$villainCharacterName` not found.")
     }
 

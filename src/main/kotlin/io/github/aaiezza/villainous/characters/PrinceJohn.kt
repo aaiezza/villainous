@@ -16,7 +16,8 @@ class PrinceJohnBoardGenerator : CharacterBoardGenerator {
         return Board(
             villainCharacter = VillainCharacter(
                 VillainCharacter.Name("Prince John"),
-                VillainCharacter.Objective("Start your turn with at least 20 power.")
+                VillainCharacter.Objective("Start your turn with at least 20 power."),
+                VillainousExpansion.THE_WORST_TAKES_IT_ALL
             ),
             realm = Realm(
                 Location(
@@ -67,21 +68,21 @@ val PRINCE_JOHN_VILLIAN_DECK = {
             VillainCard.Standard.Effect(
                 Name("Beautiful, Lovely Taxes"),
                 Description("Gain 1 Power for each Hero in your Realm."),
-                cost = Power(0)
+                cost = CardCost(0)
             )
         } to 3,
         {
             VillainCard.Standard.Effect(
                 Name("Imprison"),
                 Description("Move a Hero to The Jail."),
-                cost = Power(2)
+                cost = CardCost(2)
             )
         } to 3,
         {
             VillainCard.Standard.Ally(
                 Name("Rhino Guards"),
                 Description("No additional Ability."),
-                cost = Power(3),
+                cost = CardCost(3),
                 Strength(4)
             )
         } to 3,
@@ -89,7 +90,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
             VillainCard.Standard.Item(
                 Name("Warrant"),
                 Description("Gain 2 Power each time a Hero is played to this location."),
-                cost = Power(3)
+                cost = CardCost(3)
             )
         } to 3,
         {
@@ -99,7 +100,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                     "When performing a Vanquish action, " +
                             "Wolf Archers may be used to defeat a Hero at their location or at an adjacent location."
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(2)
             )
         } to 3,
@@ -110,7 +111,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                     "When Bow and Arrows is played, attach it to an Ally. " +
                             "That Ally gets +1 Strength. When that Ally would be discarded, discard this Item instead."
                 ),
-                cost = Power(1),
+                cost = CardCost(1),
                 VillainCard.Standard.Item.Effect.AddStrengthToAlly(Strength(+1))
             )
         } to 2,
@@ -138,7 +139,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                 Description(
                     "You may move an Ally to any location. Perform a Vanquish action."
                 ),
-                cost = Power(1)
+                cost = CardCost(1)
             )
         } to 2,
         {
@@ -148,7 +149,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                     "When Golden Arrow is played, attach it to an Ally. " +
                             "When that Ally is used to defeat a Hero, gain 2 Power."
                 ),
-                cost = Power(0)
+                cost = CardCost(0)
             )
         } to 1,
         {
@@ -157,7 +158,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                 Description(
                     "Perform a Vanquish action, but do not discard the Allies used to defeat the Hero."
                 ),
-                cost = Power(2)
+                cost = CardCost(2)
             )
         } to 1,
         {
@@ -166,7 +167,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                 Description(
                     "If Prince John is at this location, all card Costs are reduced by 1 Power."
                 ),
-                cost = Power(1)
+                cost = CardCost(1)
             )
         } to 1,
         {
@@ -175,7 +176,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                 Description(
                     "All other Allies at Nutsy's location get +1 Strength."
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(2)
             )
         } to 1,
@@ -186,7 +187,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                     "Before Prince John moves, you may move Sheriff of Nottingham " +
                             "to any location and gain 1 Power if there are any Heroes at his new location."
                 ),
-                cost = Power(3),
+                cost = CardCost(3),
                 Strength(3)
             )
         } to 1,
@@ -196,7 +197,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                 Description(
                     "If Prince John is at Sir Hiss's location, you may perform one action that is covered by a Hero at that location."
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(2)
             )
         } to 1,
@@ -206,7 +207,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                 Description(
                     "All other Allies at Trigger's location get -1 Strength."
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(4)
             )
         } to 1,

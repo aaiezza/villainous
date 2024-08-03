@@ -17,7 +17,8 @@ class CaptainHookBoardGenerator : CharacterBoardGenerator {
         return Board(
             villainCharacter = VillainCharacter(
                 VillainCharacter.Name("Captain Hook"),
-                VillainCharacter.Objective("Defeat Peter Pan at the Jolly Roger.")
+                VillainCharacter.Objective("Defeat Peter Pan at the Jolly Roger."),
+                VillainousExpansion.THE_WORST_TAKES_IT_ALL
             ),
             realm = Realm(
                 Location(
@@ -69,7 +70,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
             VillainCard.Standard.Ally(
                 Name("Boarding Party"),
                 Description("When performing a Vanquish action, Boarding Party may be used to defeat a Hero at their location or at an adjacent unlocked location."),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(2)
             )
         } to 3,
@@ -77,14 +78,14 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
             VillainCard.Standard.Effect(
                 Name("Give Them a Scare"),
                 Description("Look at the top two cards of your Fate deck. Either discard both cards or return them to the top in any order."),
-                cost = Power(2)
+                cost = CardCost(2)
             )
         } to 3,
         {
             VillainCard.Standard.Ally(
                 Name("Swashbuckler"),
                 Description("No additional Ability."),
-                cost = Power(1),
+                cost = CardCost(1),
                 Strength(2)
             )
         } to 3,
@@ -92,7 +93,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
             VillainCard.Standard.Effect(
                 Name("Worthy Opponent"),
                 Description("Gain 2 Power. Reveal cards from the top of your Fate deck until you were reveal a Hero. Play that Hero and discard the rest."),
-                cost = Power(0)
+                cost = CardCost(0)
             )
         } to 3,
         {
@@ -101,17 +102,16 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                 Description(
                     "Move an Ally to an adjacent unlocked location. That Ally gets +2 Strength until the end of your turn."
                 ),
-                cost = Power(1)
+                cost = CardCost(1)
             )
         } to 2,
         {
             VillainCard.Standard.Item(
-
                 Name("Cannon"),
                 Description(
                     "This location gains:"
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 actionSpaceSlots = listOf(VANQUISH().notCoverable())
             )
         } to 2,
@@ -130,7 +130,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                 Description(
                     "When Cutlass is played, attach it to an Ally. That Ally gets +2 Strength."
                 ),
-                cost = Power(1),
+                cost = CardCost(1),
                 VillainCard.Standard.Item.Effect.AddStrengthToAlly(Strength(+2))
             )
         } to 2,
@@ -140,7 +140,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                 Description(
                     "This location gains:"
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 actionSpaceSlots = listOf(GAIN_POWER(1u).notCoverable())
             )
         } to 2,
@@ -161,7 +161,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                 Description(
                     "No additional Ability."
                 ),
-                cost = Power(3),
+                cost = CardCost(3),
                 Strength(4)
             )
         } to 2,
@@ -171,7 +171,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                 Description(
                     "This location gains:"
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 actionSpaceSlots = listOf(MOVE_A_HERO().notCoverable())
             )
         } to 1,
@@ -182,7 +182,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                     "When Mr. Starkey is played, " +
                             "you may move a Hero from his location to an adjacent unlocked location."
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(2)
             )
         } to 1,
@@ -193,7 +193,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                     "When Never Lan Map is played, unlock Hangman's Tree.\n" +
                             "When you play an Item, you may discard Never Land Map instead of paying the Item's Cost."
                 ),
-                cost = Power(4)
+                cost = CardCost(4)
             )
         } to 1,
         {
@@ -202,7 +202,7 @@ val CAPTAIN_HOOK_VILLIAN_DECK = {
                 Description(
                     "Smee gets +2 Strength if he is at the Jolly Roger."
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(2)
             )
         } to 1,
@@ -245,7 +245,7 @@ val CAPTAIN_HOOK_FATE_DECK = {
                             "Captain Hook must defeat Heroes with Taunt before defeating other Heroes."
                 )
             )
-        } to 1,
+        } to 2,
         {
             FateCard.Standard.Hero(
                 Name("John"),

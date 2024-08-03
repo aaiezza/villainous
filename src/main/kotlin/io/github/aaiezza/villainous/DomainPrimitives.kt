@@ -18,7 +18,18 @@ data class Board(
     val fateToken: FateToken? = null,
 )
 
-data class VillainCharacter(val name: Name, val objective: Objective) {
+enum class VillainousExpansion(val value: String) {
+    THE_WORST_TAKES_IT_ALL("The Worst Takes it All"),
+    INTRODUCTION_TO_EVIL("Introduction to Evil"),
+    WICKED_TO_THE_CORE("Wicked to the Core"),
+    EVIL_COMES_PREPARED("Evil Comes Prepared"),
+    PERFECTLY_WRETCHED("Perfectly Wretched"),
+    DESPICABLE_PLOTS("Despicable Plots"),
+    FILLED_WITH_FRIGHT("Filled With Fright"),
+    SUGAR_AND_SPITE("Sugar and Spite");
+}
+
+data class VillainCharacter(val name: Name, val objective: Objective, val villainousExpansion: VillainousExpansion) {
     data class Name(val value: String)
     data class Objective(val value: String)
 
@@ -32,8 +43,13 @@ interface Card {
     data class Name(val value: String)
     data class Description(val value: String)
 
+    sealed interface Cost {
+        data class Known(val value: Power) : Cost
+        class Variable : Cost
+    }
+
     interface WithCost : Card {
-        val cost: Power
+        val cost: Cost
     }
 
     interface WithStrength : Card {
@@ -50,7 +66,13 @@ interface Card {
     interface CanHaveAttachments : Placeable.ToLocation {
         val attachments: List<Placeable.ToCard>
     }
+
+    interface ProvidesActions : Placeable.ToLocation {
+        val actionSpaceSlots: List<Realm.Location.ActionSpaceSlot>
+    }
 }
+
+fun CardCost(powerCost: Int) = Card.Cost.Known(Power(powerCost))
 
 data class Power(val value: Int)
 data class Strength(val value: Int) {
@@ -62,7 +84,7 @@ interface VillainCard : Card {
         data class Effect(
             override val name: Card.Name,
             override val description: Card.Description,
-            override val cost: Power
+            override val cost: Card.Cost
         ) : VillainCard, Card.WithCost
 
         val EFFECT = ::Effect
@@ -70,10 +92,12 @@ interface VillainCard : Card {
         data class Ally(
             override val name: Card.Name,
             override val description: Card.Description,
-            override val cost: Power,
+            override val cost: Card.Cost,
             override val strength: Strength,
-            override val attachments: List<Card.Placeable.ToCard> = emptyList()
-        ) : VillainCard, Card.WithCost, Card.WithStrength, Card.Placeable.ToLocation, Card.CanHaveAttachments {
+            override val attachments: List<Card.Placeable.ToCard> = emptyList(),
+            override val actionSpaceSlots: List<Realm.Location.ActionSpaceSlot> = emptyList()
+        ) : VillainCard, Card.WithCost, Card.WithStrength, Card.Placeable.ToLocation, Card.CanHaveAttachments,
+            Card.ProvidesActions {
             fun attachItem(item: Item) = this.copy(attachments = attachments + item)
         }
 
@@ -82,10 +106,12 @@ interface VillainCard : Card {
         data class Item(
             override val name: Card.Name,
             override val description: Card.Description,
-            override val cost: Power,
+            override val cost: Card.Cost,
             val effect: Effect? = null,
-            val actionSpaceSlots: List<Realm.Location.ActionSpaceSlot> = emptyList()
-        ) : VillainCard, Card.WithCost, Card.Placeable.ToLocation, Card.Placeable.ToCard {
+            override val actionSpaceSlots: List<Realm.Location.ActionSpaceSlot> = emptyList()
+        ) : VillainCard, Card.WithCost, Card.Placeable.ToLocation, Card.Placeable.ToCard, Card.ProvidesActions {
+            // TODO: Item effects based on their presence need to be re-engineered.
+            // Need more domain instances.
             interface Effect {
                 data class AddStrengthToAlly(val strength: Strength) : Effect
             }
@@ -131,7 +157,7 @@ interface FateCard : Card {
             override val name: Card.Name,
             override val description: Card.Description,
             val effect: Effect? = null
-        ) : VillainCard, Card.Placeable.ToLocation, Card.Placeable.ToCard{
+        ) : VillainCard, Card.Placeable.ToLocation, Card.Placeable.ToCard {
             interface Effect {
                 data class AddStrengthToHero(val strength: Strength) : Effect
             }
@@ -243,6 +269,12 @@ data class Realm(val value: List<Location>) : List<Realm.Location> by value {
 interface ActionSpace {
     val actionName: String
 
+    data class CostToUse(val powerCost: Power)
+
+    interface WithCost : ActionSpace {
+        val cost: CostToUse
+    }
+
     companion object Standard {
         data class GainPower internal constructor(
             val powerValue: UInt, override val actionName: String = "Gain Power ($powerValue)"
@@ -255,6 +287,8 @@ interface ActionSpace {
         val PLAY_CARD = { PlayCard() }
 
         data class Activate internal constructor(override val actionName: String = "Activate") : ActionSpace
+        fun Activate.withCost(powerCost: Int) = ActivateAtCost(cost = CostToUse(Power(powerCost)))
+        data class ActivateAtCost internal constructor(override val actionName: String = "Activate", override val cost: CostToUse) : WithCost
 
         val ACTIVATE = { Activate() }
 

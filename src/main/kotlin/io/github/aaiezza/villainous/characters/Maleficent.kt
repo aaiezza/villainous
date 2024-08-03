@@ -6,19 +6,19 @@ class MaleficentVillainCard {
     data class Curse(
         override val name: Card.Name,
         override val description: Card.Description,
-        override val cost: Power,
+        override val cost: Card.Cost,
     ) : VillainCard, Card.WithCost, Card.Placeable.ToLocation
 }
 
 typealias VillainCard_Maleficent_Curse = MaleficentVillainCard.Curse
-
 
 class MaleficentBoardGenerator : CharacterBoardGenerator {
     override fun invoke(): Board {
         return Board(
             villainCharacter = VillainCharacter(
                 VillainCharacter.Name("Maleficent"),
-                VillainCharacter.Objective("Start your turn with a Curse at each location.")
+                VillainCharacter.Objective("Start your turn with a Curse at each location."),
+                VillainousExpansion.THE_WORST_TAKES_IT_ALL
             ),
             realm = Realm(
                 Realm.Location(
@@ -70,7 +70,7 @@ val MALEFICENT_VILLIAN_DECK = {
             VillainCard.Standard.Ally(
                 Card.Name("Cackling Good"),
                 Card.Description("Cackling Goon gets +1 Strength for each Hero at his location."),
-                cost = Power(1),
+                cost = CardCost(1),
                 Strength(1)
             )
         } to 3,
@@ -78,30 +78,30 @@ val MALEFICENT_VILLIAN_DECK = {
             VillainCard.Standard.Effect(
                 Card.Name("Dragon Form"),
                 Card.Description("Defeat a Hero with a Strength of 3 or less. If a Fate action targets you before your next turn, gain 3 Power."),
-                cost = Power(3)
+                cost = CardCost(3)
             )
         } to 3,
         {
             VillainCard_Maleficent_Curse(
                 Card.Name("Forest of thorns"),
                 Card.Description("Heroes must have a Strength of 4 or more to be played to this location.\nDiscard this Curse when a Hero is played to this location."),
-                cost = Power(2),
+                cost = CardCost(2),
             )
         } to 3,
         {
             VillainCard_Maleficent_Curse(
                 Card.Name("Green Fire"),
                 Card.Description("Heroes cannot be played to this location.\nDiscard this Curse if Maleficent moves to this location."),
-                cost = Power(3)
+                cost = CardCost(3)
             )
         } to 3,
         {
             VillainCard.Standard.Ally(
                 Card.Name("Savage Goon"),
                 Card.Description(
-                    "No additional Ability"
+                    "No additional Ability."
                 ),
-                cost = Power(3),
+                cost = CardCost(3),
                 Strength(4)
             )
         } to 3,
@@ -111,7 +111,7 @@ val MALEFICENT_VILLIAN_DECK = {
                 Card.Description(
                     "Sinister Goon gets +1 Strength if there are any Curses at his location."
                 ),
-                cost = Power(2),
+                cost = CardCost(2),
                 Strength(3)
             )
         } to 3,
@@ -121,7 +121,7 @@ val MALEFICENT_VILLIAN_DECK = {
                 Card.Description(
                     "On your next turn, Maleficent does not have to move to a new location."
                 ),
-                cost = Power(0)
+                cost = CardCost(0)
             )
         } to 3,
         {
@@ -131,7 +131,7 @@ val MALEFICENT_VILLIAN_DECK = {
                     "Heroes at this location get -2 Strength.\n" +
                             "Discard this Curse when an Ally is played to this location."
                 ),
-                cost = Power(3)
+                cost = CardCost(3)
             )
         } to 2,
         {
@@ -159,7 +159,7 @@ val MALEFICENT_VILLIAN_DECK = {
                     "Before Maleficent moves, you may move Raven to any location and perform one " +
                             "available action at his new location. Raven cannot perform Fate actions."
                 ),
-                cost = Power(3),
+                cost = CardCost(3),
                 Strength(1)
             )
         } to 1,
@@ -169,7 +169,7 @@ val MALEFICENT_VILLIAN_DECK = {
                 Card.Description(
                     "If a Hero is defeated at this location, gain Power equal to the Hero's Strength minus 1."
                 ),
-                cost = Power(1)
+                cost = CardCost(1)
             )
         } to 1,
         {
@@ -179,7 +179,7 @@ val MALEFICENT_VILLIAN_DECK = {
                     "If Maleficient is at this location, " +
                             "the Cost to play an Effect or Curse is reduced by 1 Power."
                 ),
-                cost = Power(1)
+                cost = CardCost(1)
             )
         } to 1,
     ).duplicateCards().let { VillainCard.Deck(it) }

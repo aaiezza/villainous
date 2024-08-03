@@ -15,10 +15,11 @@ class GameTest {
             listOf(
                 "Prince John".asVillainousPlayer("1".asUsername()),
                 "Maleficent".asVillainousPlayer("2".asUsername()),
-                "Prince John".asVillainousPlayer("3".asUsername()),
+                "Captain Hook".asVillainousPlayer("3".asUsername()),
                 "Maleficent".asVillainousPlayer("4".asUsername()),
                 "Prince John".asVillainousPlayer("5".asUsername()),
-                "Maleficent".asVillainousPlayer("6".asUsername()),
+                "Prince John".asVillainousPlayer("5".asUsername()),
+                "Captain Hook".asVillainousPlayer("6".asUsername()),
             ), 2
         )
     }
@@ -33,6 +34,7 @@ class GameTest {
             println(" ----- State $i -----")
             state.players.forEach { (player, villain) ->
                 println("${player.username.value} - Villain: ${villain.villainCharacter.name.value} ${if (player is Game.Player.Active) " (Active)" else ""}")
+                println("Exapansion: ${villain.villainCharacter.villainousExpansion.value}")
                 println("Objective: ${villain.villainCharacter.objective.value}")
                 println("Board:\n")
                 villain.realm.flatMap { it.actionSpaceSlots + " | " }
@@ -53,7 +55,7 @@ class GameTest {
                         }
                     }
                 println()
-                villain.realm.forEach { print("${it.name} _ ") }
+                villain.realm.forEach { print("${it.name}${if(it is Realm.Location.Lockable.Locked) " \uD83D\uDD12" else " "}_ ") }
                 println()
                 println()
 
