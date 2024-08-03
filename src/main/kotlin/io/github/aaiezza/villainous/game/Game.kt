@@ -12,6 +12,9 @@ data class Game private constructor(val initialGameState: State) {
     val currentState: State
         get() = history.last()
 
+    val startingPlayer: PlayerAndBoard
+        get() = history.first().players.toList()[0].let { PlayerAndBoard(it.first, it.second) }
+
     constructor (
         players: List<Player.Inactive>, startingPlayerIndex: Int = 0
     ) : this(State.initializeGameState(createPlayersFromList(players, startingPlayerIndex)))
@@ -36,7 +39,11 @@ data class Game private constructor(val initialGameState: State) {
         val players: Players
     ) {
         companion object {
-            fun initializeGameState(players: Players) = State(players).let { GiveInitialPower.apply(it) }
+            fun initializeGameState(players: Players) = State(players)
+                .let(ShuffleAllFateDecks::apply)
+                .let(ShuffleAllVillainDecks::apply)
+                .let(DealInitialHandsToAllPlayers::apply)
+                .let(GiveInitialPower::apply)
         }
 
         fun interface Mover {
@@ -45,11 +52,13 @@ data class Game private constructor(val initialGameState: State) {
     }
 }
 
-class Players(
-    playerMap: Map<Game.Player, Board>,
-    private val value: Map<Game.Player, Board> = playerMap.shiftPlayersSoActiveIsFirst()
+class Players private constructor(
+    private val value: Map<Game.Player, Board>
 ) : Map<Game.Player, Board> by value {
-
+    init {
+        require(filterKeys { it is Game.Player.Active }.size == 1) { "Only one player can be active at a time" }
+        require(keys.first() is Game.Player.Active) { "First player must be the active player" }
+    }
 
     companion object {
         private fun Map<Game.Player, Board>.markStartingPlayerAsActive(playerToMakeActive: Game.Player) =
@@ -67,7 +76,26 @@ class Players(
 
         fun createPlayersFromList(players: List<Game.Player>, startingPlayerIndex: Int) =
             players.associateWith { getVillainBoard(it.villainCharacterName)() }
-                .markStartingPlayerAsActive(players[startingPlayerIndex]).let { Players(it) }
+                .markStartingPlayerAsActive(players[startingPlayerIndex]).let { createPlayers(it) }
+
+        fun createPlayers(value: Map<Game.Player, Board>) = Players(value.shiftPlayersSoActiveIsFirst())
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Players) return false
+
+        if (value != other.value) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return value.hashCode()
+    }
+
+    override fun toString(): String {
+        return "Players(value=$value)"
     }
 }
 
