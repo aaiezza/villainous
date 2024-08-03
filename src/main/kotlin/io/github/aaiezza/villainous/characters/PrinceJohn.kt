@@ -66,15 +66,15 @@ val PRINCE_JOHN_VILLIAN_DECK = {
         {
             VillainCard.Standard.Effect(
                 Name("Beautiful, Lovely Taxes"),
-                Description("Gain 1 Power for each Hero in your Realm"),
-                Power(0)
+                Description("Gain 1 Power for each Hero in your Realm."),
+                cost = Power(0)
             )
         } to 3,
         {
             VillainCard.Standard.Effect(
                 Name("Imprison"),
-                Description("Move a Hero to The Jail"),
-                Power(2)
+                Description("Move a Hero to The Jail."),
+                cost = Power(2)
             )
         } to 3,
         {
@@ -111,7 +111,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                             "That Ally gets +1 Strength. When that Ally would be discarded, discard this Item instead."
                 ),
                 cost = Power(1),
-                VillainCard.Standard.Item.Effect.AddStrengthToAlly(Strength(1))
+                VillainCard.Standard.Item.Effect.AddStrengthToAlly(Strength(+1))
             )
         } to 2,
         {
@@ -210,8 +210,7 @@ val PRINCE_JOHN_VILLIAN_DECK = {
                 Strength(4)
             )
         } to 1,
-    ).flatMap { (getCard, times) -> (0 until times).map { getCard() } }
-        .let { VillainCard.Deck(it) }
+    ).duplicateCards().let { VillainCard.Deck(it) }
 }
 
 val PRINCE_JOHN_FATE_DECK = {
@@ -317,6 +316,5 @@ val PRINCE_JOHN_FATE_DECK = {
                 Strength(2)
             )
         } to 1,
-    ).flatMap { (getCard, times) -> (0 until times).map { getCard() } }
-        .let { FateCard.Deck(it) }
+    ).duplicateCards().let { FateCard.Deck(it) }
 }

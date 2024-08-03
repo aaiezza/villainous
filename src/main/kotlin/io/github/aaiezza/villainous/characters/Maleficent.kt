@@ -70,7 +70,7 @@ val MALEFICENT_VILLIAN_DECK = {
             VillainCard.Standard.Ally(
                 Card.Name("Cackling Good"),
                 Card.Description("Cackling Goon gets +1 Strength for each Hero at his location."),
-                Power(1),
+                cost = Power(1),
                 Strength(1)
             )
         } to 3,
@@ -78,7 +78,7 @@ val MALEFICENT_VILLIAN_DECK = {
             VillainCard.Standard.Effect(
                 Card.Name("Dragon Form"),
                 Card.Description("Defeat a Hero with a Strength of 3 or less. If a Fate action targets you before your next turn, gain 3 Power."),
-                Power(3)
+                cost = Power(3)
             )
         } to 3,
         {
@@ -182,8 +182,7 @@ val MALEFICENT_VILLIAN_DECK = {
                 cost = Power(1)
             )
         } to 1,
-    ).flatMap { (getCard, times) -> (0 until times).map { getCard() } }
-        .let { VillainCard.Deck(it) }
+    ).duplicateCards().let { VillainCard.Deck(it) }
 }
 
 val MALEFICENT_FATE_DECK = {
@@ -283,6 +282,5 @@ val MALEFICENT_FATE_DECK = {
                 Strength(5)
             )
         } to 1,
-    ).flatMap { (getCard, times) -> (0 until times).map { getCard() } }
-        .let { FateCard.Deck(it) }
+    ).duplicateCards().let { FateCard.Deck(it) }
 }

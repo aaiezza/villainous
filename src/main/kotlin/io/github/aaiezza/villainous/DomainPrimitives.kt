@@ -21,6 +21,8 @@ data class Board(
 data class VillainCharacter(val name: Name, val objective: Objective) {
     data class Name(val value: String)
     data class Objective(val value: String)
+
+    class VillainMover
 }
 
 interface Card {
@@ -81,7 +83,8 @@ interface VillainCard : Card {
             override val name: Card.Name,
             override val description: Card.Description,
             override val cost: Power,
-            val effect: Effect? = null
+            val effect: Effect? = null,
+            val actionSpaceSlots: List<Realm.Location.ActionSpaceSlot> = emptyList()
         ) : VillainCard, Card.WithCost, Card.Placeable.ToLocation, Card.Placeable.ToCard {
             interface Effect {
                 data class AddStrengthToAlly(val strength: Strength) : Effect
@@ -173,41 +176,41 @@ data class Realm(val value: List<Location>) : List<Realm.Location> by value {
             data class NotCoverableActionSpaceSlot(override val actionSpace: ActionSpace) : ActionSpaceSlot
         }
 
-        sealed class LockableLocation(
+        sealed class Lockable(
             override val name: Name,
             override val actionSpaceSlots: List<ActionSpaceSlot>,
-            override val fateCards: List<FateCard>,
-            override val villainCards: List<VillainCard>
+            override val fateCards: List<FateCard> = emptyList(),
+            override val villainCards: List<VillainCard> = emptyList(),
         ) : Location(name, actionSpaceSlots, fateCards, villainCards) {
-            abstract fun toggleLock(): LockableLocation
-            data class LockedLocation(
+            abstract fun toggleLock(): Lockable
+            data class Locked(
                 override val name: Name,
                 override val actionSpaceSlots: List<ActionSpaceSlot>,
-                override val fateCards: List<FateCard>,
-                override val villainCards: List<VillainCard>
-            ) : LockableLocation(name, actionSpaceSlots, fateCards, villainCards) {
-                override fun toggleLock() = UnlockedLocation(name, actionSpaceSlots, fateCards, villainCards)
+                override val fateCards: List<FateCard> = emptyList(),
+                override val villainCards: List<VillainCard> = emptyList(),
+            ) : Lockable(name, actionSpaceSlots, fateCards, villainCards) {
+                override fun toggleLock() = Unlocked(name, actionSpaceSlots, fateCards, villainCards)
 
                 override fun addFateCard(fateCard: FateCard) =
-                    LockedLocation(name, actionSpaceSlots, fateCards + fateCard, villainCards)
+                    Locked(name, actionSpaceSlots, fateCards + fateCard, villainCards)
 
                 override fun addVillainCard(villainCard: VillainCard) =
-                    LockedLocation(name, actionSpaceSlots, fateCards, villainCards + villainCard)
+                    Locked(name, actionSpaceSlots, fateCards, villainCards + villainCard)
             }
 
-            data class UnlockedLocation(
+            data class Unlocked(
                 override val name: Name,
                 override val actionSpaceSlots: List<ActionSpaceSlot>,
-                override val fateCards: List<FateCard>,
-                override val villainCards: List<VillainCard>
-            ) : LockableLocation(name, actionSpaceSlots, fateCards, villainCards) {
-                override fun toggleLock() = LockedLocation(name, actionSpaceSlots, fateCards, villainCards)
+                override val fateCards: List<FateCard> = emptyList(),
+                override val villainCards: List<VillainCard> = emptyList(),
+            ) : Lockable(name, actionSpaceSlots, fateCards, villainCards) {
+                override fun toggleLock() = Locked(name, actionSpaceSlots, fateCards, villainCards)
 
                 override fun addFateCard(fateCard: FateCard) =
-                    UnlockedLocation(name, actionSpaceSlots, fateCards + fateCard, villainCards)
+                    Unlocked(name, actionSpaceSlots, fateCards + fateCard, villainCards)
 
                 override fun addVillainCard(villainCard: VillainCard) =
-                    UnlockedLocation(name, actionSpaceSlots, fateCards, villainCards + villainCard)
+                    Unlocked(name, actionSpaceSlots, fateCards, villainCards + villainCard)
             }
         }
 
