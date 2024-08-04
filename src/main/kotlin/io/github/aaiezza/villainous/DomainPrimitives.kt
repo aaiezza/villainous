@@ -140,7 +140,7 @@ interface VillainCard : Card {
 
         val ALLY = ::Ally
 
-        data class Item(
+        open class Item(
             override val name: Card.Name,
             override val description: Card.Description,
             override val cost: Card.Cost,
@@ -148,9 +148,31 @@ interface VillainCard : Card {
             override val actionSpaceSlots: List<Realm.Location.ActionSpaceSlot> = emptyList()
         ) : VillainCard, Card.WithCost, Card.Placeable.ToLocation, Card.Placeable.ToCard, Card.ProvidesActions {
             // TODO: Item effects based on their presence need to be re-engineered.
-            // Need more domain instances.
+            // Need more domain examples.
             interface Effect {
                 data class AddStrengthToAlly(val strength: Strength) : Effect
+            }
+
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Item) return false
+
+                if (name != other.name) return false
+                if (description != other.description) return false
+                if (cost != other.cost) return false
+                if (effect != other.effect) return false
+                if (actionSpaceSlots != other.actionSpaceSlots) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = name.hashCode()
+                result = 31 * result + description.hashCode()
+                result = 31 * result + cost.hashCode()
+                result = 31 * result + (effect?.hashCode() ?: 0)
+                result = 31 * result + actionSpaceSlots.hashCode()
+                return result
             }
         }
 

@@ -16,9 +16,9 @@ class GameTest {
                 "Prince John".asVillainousPlayer("1".asUsername()),
                 "Maleficent".asVillainousPlayer("2".asUsername()),
                 "Captain Hook".asVillainousPlayer("3".asUsername()),
-                "Maleficent".asVillainousPlayer("4".asUsername()),
-                "Jafar".asVillainousPlayer("5".asUsername()),
-                "Queen of Hearts".asVillainousPlayer("6".asUsername()),
+                "Jafar".asVillainousPlayer("4".asUsername()),
+                "Queen of Hearts".asVillainousPlayer("5".asUsername()),
+                "Ursula".asVillainousPlayer("6".asUsername()),
             ), 2
         )
     }
@@ -54,7 +54,17 @@ class GameTest {
                         }
                     }
                 println()
-                villain.realm.forEach { print("${it.name}${if(it is Realm.Location.Lockable.Locked) " \uD83D\uDD12" else " "}_ ") }
+                villain.realm.forEach {
+                    print(
+                        "${it.name}" +
+                                when (it) {
+                                    is Realm.Location.Lockable.Locked -> " \uD83D\uDD12"
+                                    is Realm.Location.Lockable.Unlocked -> " \uD83D\uDD13"
+                                    else -> " "
+                                } +
+                                "_ "
+                    )
+                }
                 println()
                 println()
 
