@@ -12,6 +12,9 @@ data class Game private constructor(val initialGameState: State) {
     val currentState: State
         get() = history.last()
 
+    val currentPlayer: PlayerAndBoard
+        get() = currentState.players.toList()[0].let { PlayerAndBoard(it.first, it.second) }
+
     val startingPlayer: PlayerAndBoard
         get() = history.first().players.toList()[0].let { PlayerAndBoard(it.first, it.second) }
 
@@ -48,6 +51,14 @@ data class Game private constructor(val initialGameState: State) {
 
         fun interface Mover {
             fun apply(gameState: State): State
+        }
+    }
+
+    interface AwaitingPhase {
+        enum class Standard : AwaitingPhase {
+            MOVE_VILLAIN_MOVER,
+            PERFORM_OR_DENY_AVAILABLE_ACTIONS,
+            DRAW_CARDS
         }
     }
 }
