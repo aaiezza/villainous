@@ -14,6 +14,7 @@ fun getVillainBoard(villainCharacterName: VillainCharacter.Name): CharacterBoard
         VillainCharacter.Name("Jafar") -> JafarBoardGenerator()
         VillainCharacter.Name("Queen of Hearts") -> QueenOfHeartsBoardGenerator()
         VillainCharacter.Name("Ursula") -> UrsulaBoardGenerator()
+        VillainCharacter.Name("King Candy") -> KingCandyBoardGenerator()
         else -> throw IllegalArgumentException("Villain Character `$villainCharacterName` not found.")
     }
 

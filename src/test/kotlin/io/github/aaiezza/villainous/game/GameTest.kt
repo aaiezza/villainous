@@ -13,7 +13,7 @@ class GameTest {
     fun setUp() {
         subject = Game(
             listOf(
-                "Prince John".asVillainousPlayer("1".asUsername()),
+                "King Candy".asVillainousPlayer("1".asUsername()),
                 "Maleficent".asVillainousPlayer("2".asUsername()),
                 "Captain Hook".asVillainousPlayer("3".asUsername()),
                 "Jafar".asVillainousPlayer("4".asUsername()),
