@@ -7,7 +7,7 @@ import io.github.aaiezza.villainous.game.Players.Companion.createPlayers
 
 val GiveInitialPower = Game.State.Mover { gs ->
     gs.players.mapIndexedToPlayers { i, (player, board) ->
-        player to board.copy(powerTokens = INITIAL_POWER_AMOUNTS[i]?.plus(board.powerTokens) ?: error(""))
+        player to board.copy(powerTokens = INITIAL_POWER_AMOUNTS.getValue(i).plus(board.powerTokens))
     }.let { gs.copy(players = it) }
 }
 
@@ -30,7 +30,7 @@ val DealInitialHandsToAllPlayers = Game.State.Mover { gs ->
 }
 
 
-val INITIAL_POWER_AMOUNTS = mapOf(
+val INITIAL_POWER_AMOUNTS : Map<Int, Power> = mapOf(
     0 to Power(0),
     1 to Power(1),
     2 to Power(2),
@@ -38,7 +38,7 @@ val INITIAL_POWER_AMOUNTS = mapOf(
     4 to Power(3),
     5 to Power(3),
 ).let { map ->
-    map.withDefault {
+    map. withDefault {
         error(
             "Game does not currently support more than ${map.size} players, " +
                     "but the initial power amount for $it players was requested."

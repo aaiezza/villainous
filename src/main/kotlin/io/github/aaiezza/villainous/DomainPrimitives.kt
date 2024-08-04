@@ -89,7 +89,7 @@ interface VillainCard : Card {
 
         val EFFECT = ::Effect
 
-        data class Ally(
+        open class Ally(
             override val name: Card.Name,
             override val description: Card.Description,
             override val cost: Card.Cost,
@@ -99,6 +99,43 @@ interface VillainCard : Card {
         ) : VillainCard, Card.WithCost, Card.WithStrength, Card.Placeable.ToLocation, Card.CanHaveAttachments,
             Card.ProvidesActions {
             fun attachItem(item: Item) = this.copy(attachments = attachments + item)
+
+            fun copy(
+                name: Card.Name = this.name,
+                description: Card.Description = this.description,
+                cost: Card.Cost = this.cost,
+                strength: Strength = this.strength,
+                attachments: List<Card.Placeable.ToCard> = this.attachments,
+                actionSpaceSlots: List<Realm.Location.ActionSpaceSlot> = this.actionSpaceSlots
+            ) = Ally(name, description, cost, strength, attachments, actionSpaceSlots)
+
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Ally) return false
+
+                if (name != other.name) return false
+                if (description != other.description) return false
+                if (cost != other.cost) return false
+                if (strength != other.strength) return false
+                if (attachments != other.attachments) return false
+                if (actionSpaceSlots != other.actionSpaceSlots) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = name.hashCode()
+                result = 31 * result + description.hashCode()
+                result = 31 * result + cost.hashCode()
+                result = 31 * result + strength.hashCode()
+                result = 31 * result + attachments.hashCode()
+                result = 31 * result + actionSpaceSlots.hashCode()
+                return result
+            }
+
+            override fun toString(): String {
+                return "Ally(name=$name, description=$description, cost=$cost, strength=$strength, attachments=$attachments, actionSpaceSlots=$actionSpaceSlots)"
+            }
         }
 
         val ALLY = ::Ally
