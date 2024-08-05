@@ -15,6 +15,7 @@ import io.github.aaiezza.villainous.Realm.Location
 import io.github.aaiezza.villainous.Realm.Location.Section.Companion.buildSections
 import io.github.aaiezza.villainous.characters.KingCandyActionSpace.Companion.GAIN_POWER_INTERSECTION
 import io.github.aaiezza.villainous.characters.KingCandyActionSpace.Companion.START_FINISH
+import io.github.aaiezza.villainous.game.play.moves.VillainMoverStateMover
 
 class KingCandyVillainCard {
     open class CardGuard(
@@ -102,7 +103,8 @@ class KingCandyBoardGenerator : CharacterBoardGenerator {
                 ),
             ),
             villainDeck = KING_CANDY_VILLIAN_DECK(),
-            fateDeck = KING_CANDY_FATE_DECK()
+            fateDeck = KING_CANDY_FATE_DECK(),
+            villainMoverType = VillainMoverStateMover.MoveToActionSpaceSlot::class
         )
     }
 }

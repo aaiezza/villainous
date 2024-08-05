@@ -1,8 +1,7 @@
 package io.github.aaiezza.villainous
 
-data class VillainousBoardState(
-    val boards: List<Board>,
-)
+import io.github.aaiezza.villainous.game.play.moves.VillainMoverStateMover
+import kotlin.reflect.KClass
 
 data class Board(
     val villainCharacter: VillainCharacter,
@@ -16,6 +15,8 @@ data class Board(
     val fateDeck: FateCard.Deck = FateCard.Deck(),
     val fateDiscardPile: FateCard.DiscardPile = FateCard.DiscardPile(),
     val fateToken: FateToken? = null,
+    val villainMoverType: KClass<out VillainMoverStateMover> = VillainMoverStateMover.MoveToLocation::class,
+    val villainMoverLocation: VillainMoverLocation,
 )
 
 enum class VillainousExpansion(val value: String) {
@@ -32,9 +33,9 @@ enum class VillainousExpansion(val value: String) {
 data class VillainCharacter(val name: Name, val objective: Objective, val villainousExpansion: VillainousExpansion) {
     data class Name(val value: String)
     data class Objective(val value: String)
-
-    class VillainMover
 }
+
+interface VillainMoverLocation
 
 interface Card {
     val name: Name
@@ -238,7 +239,7 @@ data class Realm(val value: List<Location>) : List<Realm.Location> by value {
         open val name: Name,
         open val actionSpaceSlots: List<ActionSpaceSlot>,
         open val sections: List<Section>,
-    ) {
+    ) : VillainMoverLocation {
         // Standard Single Section Location
         constructor(
             name: Name,
@@ -286,7 +287,7 @@ data class Realm(val value: List<Location>) : List<Realm.Location> by value {
             }
         }
 
-        sealed interface ActionSpaceSlot {
+        sealed interface ActionSpaceSlot : VillainMoverLocation {
             val actionSpace: ActionSpace
 
             data class CoverableActionSpaceSlot(

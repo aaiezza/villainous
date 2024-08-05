@@ -24,7 +24,12 @@ class GameTest {
     }
 
     @Test
-    fun `should work as expected`() {
+    fun `should play as expected`() {
+
+    }
+
+    @Test
+    fun `should print as expected`() {
         assertThat(subject.history).hasSize(1)
 
         println("Villainous Game")
@@ -33,7 +38,7 @@ class GameTest {
             println(" ----- State $i -----")
             state.players.forEach { (player, villain) ->
                 println("${player.username.value} - Villain: ${villain.villainCharacter.name.value} ${if (player is Game.Player.Active) " (Active)" else ""}")
-                println("Exapansion: ${villain.villainCharacter.villainousExpansion.value}")
+                println("Expansion: ${villain.villainCharacter.villainousExpansion.value}")
                 println("Objective: ${villain.villainCharacter.objective.value}")
                 println("Board:\n")
                 villain.realm.flatMap { it.actionSpaceSlots + " | " }

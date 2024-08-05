@@ -4,19 +4,32 @@ import io.github.aaiezza.villainous.Board
 import io.github.aaiezza.villainous.VillainCharacter
 import io.github.aaiezza.villainous.characters.getVillainBoard
 import io.github.aaiezza.villainous.game.Players.Companion.createPlayersFromList
+import io.github.aaiezza.villainous.game.play.moves.DealInitialHandsToAllPlayers
+import io.github.aaiezza.villainous.game.play.moves.GiveInitialPower
+import io.github.aaiezza.villainous.game.play.moves.ShuffleAllFateDecks
+import io.github.aaiezza.villainous.game.play.moves.ShuffleAllVillainDecks
 
 
-data class Game private constructor(val initialGameState: State) {
-    val history = listOf(initialGameState)
+data class Game private constructor(val initialGameState: State,
+    val history: List<State> = listOf(initialGameState)) {
+
+    fun copy(nextState: State) = Game(initialGameState, history + nextState)
 
     val currentState: State
         get() = history.last()
 
     val currentPlayer: PlayerAndBoard
-        get() = currentState.players.toList()[0].let { PlayerAndBoard(it.first, it.second) }
+        get() = currentState.activePlayer
+
+    val currentAvailableMoves: List<State.Mover>
+        get() = currentState.availableMoves
 
     val startingPlayer: PlayerAndBoard
         get() = history.first().players.toList()[0].let { PlayerAndBoard(it.first, it.second) }
+
+    fun progress(move: State.Mover) : Game = currentAvailableMoves.single { it == move }
+        .let { it.moveState(currentState) }
+        .let { copy(it) }
 
     constructor (
         players: List<Player.Inactive>, startingPlayerIndex: Int = 0
@@ -38,27 +51,29 @@ data class Game private constructor(val initialGameState: State) {
         fun makeInactive() = if (this !is Inactive) Inactive(username, villainCharacterName) else this
     }
 
-    data class State private constructor(
-        val players: Players
+    data class State(
+        val players: Players,
+        val availableMoves: List<Mover> = emptyList(),
     ) {
+        val activePlayer: PlayerAndBoard
+            get() = players.toList()[0].let { PlayerAndBoard(it.first, it.second) }
+
         companion object {
-            fun initializeGameState(players: Players) = State(players)
-                .let(ShuffleAllFateDecks::apply)
-                .let(ShuffleAllVillainDecks::apply)
-                .let(DealInitialHandsToAllPlayers::apply)
-                .let(GiveInitialPower::apply)
+            fun initializeGameState(players: Players) = State(players, listOf(ShuffleAllFateDecks))
+                .let(ShuffleAllFateDecks::moveState)
+                .let(ShuffleAllVillainDecks::moveState)
+                .let(DealInitialHandsToAllPlayers::moveState)
+                .let(GiveInitialPower::moveState)
         }
 
-        fun interface Mover {
-            fun apply(gameState: State): State
-        }
-    }
+        abstract class Mover {
+            protected abstract fun apply(gameState: State): Pair<State, List<Mover>>
+            fun moveState(gameState: State) =
+                apply(gameState)
+                    .let { it.first.copy(availableMoves = it.second) }
 
-    interface AwaitingPhase {
-        enum class Standard : AwaitingPhase {
-            MOVE_VILLAIN_MOVER,
-            PERFORM_OR_DENY_AVAILABLE_ACTIONS,
-            DRAW_CARDS
+            abstract class AwaitingGame : Mover()
+            abstract class AwaitingPlayer : Mover()
         }
     }
 }

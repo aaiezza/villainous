@@ -20,49 +20,52 @@ class CaptainHookBoardGenerator : CharacterBoardGenerator {
                 VillainCharacter.Objective("Defeat Peter Pan at the Jolly Roger."),
                 VillainousExpansion.THE_WORST_TAKES_IT_ALL
             ),
-            realm = Realm(
-                Location(
-                    name = Location.Name("Jolly Roger"),
-                    actionSpaceSlots = listOf(
-                        GAIN_POWER(1u).coverable(),
-                        DISCARD().coverable(),
-                        VANQUISH().notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Skull Rock"),
-                    actionSpaceSlots = listOf(
-                        GAIN_POWER(1u).coverable(),
-                        PLAY_CARD().coverable(),
-                        FATE().notCoverable(),
-                        DISCARD().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Mermaid Lagoon"),
-                    actionSpaceSlots = listOf(
-                        PLAY_CARD().coverable(),
-                        MOVE_AN_ITEM_OR_ALLY().coverable(),
-                        GAIN_POWER(3u).notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Location.Lockable.Locked(
-                    name = Location.Name("Hangman's Tree"),
-                    actionSpaceSlots = listOf(
-                        FATE().coverable(),
-                        GAIN_POWER(2u).coverable(),
-                        MOVE_A_HERO().notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-            ),
+            realm = CAPTAIN_HOOK_REALM,
             villainDeck = CAPTAIN_HOOK_VILLIAN_DECK(),
-            fateDeck = CAPTAIN_HOOK_FATE_DECK()
+            fateDeck = CAPTAIN_HOOK_FATE_DECK(),
+            villainMoverLocation = CAPTAIN_HOOK_REALM[0]
         )
     }
 }
+
+val CAPTAIN_HOOK_REALM = Realm(
+    Location(
+        name = Location.Name("Jolly Roger"),
+        actionSpaceSlots = listOf(
+            GAIN_POWER(1u).coverable(),
+            DISCARD().coverable(),
+            VANQUISH().notCoverable(),
+            PLAY_CARD().notCoverable(),
+        )
+    ),
+    Location(
+        name = Location.Name("Skull Rock"),
+        actionSpaceSlots = listOf(
+            GAIN_POWER(1u).coverable(),
+            PLAY_CARD().coverable(),
+            FATE().notCoverable(),
+            DISCARD().notCoverable(),
+        )
+    ),
+    Location(
+        name = Location.Name("Mermaid Lagoon"),
+        actionSpaceSlots = listOf(
+            PLAY_CARD().coverable(),
+            MOVE_AN_ITEM_OR_ALLY().coverable(),
+            GAIN_POWER(3u).notCoverable(),
+            PLAY_CARD().notCoverable(),
+        )
+    ),
+    Location.Lockable.Locked(
+        name = Location.Name("Hangman's Tree"),
+        actionSpaceSlots = listOf(
+            FATE().coverable(),
+            GAIN_POWER(2u).coverable(),
+            MOVE_A_HERO().notCoverable(),
+            PLAY_CARD().notCoverable(),
+        )
+    ),
+)
 
 val CAPTAIN_HOOK_VILLIAN_DECK = {
     listOf(
