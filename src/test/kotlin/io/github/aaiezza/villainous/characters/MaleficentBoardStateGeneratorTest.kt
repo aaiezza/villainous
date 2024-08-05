@@ -7,19 +7,19 @@ import io.github.aaiezza.villainous.Realm.Location.ActionSpaceSlot.NotCoverableA
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class PrinceJohnBoardGeneratorTest {
-    private lateinit var subject: PrinceJohnBoardGenerator
+class MaleficentBoardStateGeneratorTest {
+    private lateinit var subject: MaleficentBoardStateGenerator
 
     @BeforeTest
     fun setUp() {
-        subject = PrinceJohnBoardGenerator()
+        subject = MaleficentBoardStateGenerator()
     }
 
     @Test
     fun `should produce expected results`() {
         val villain = subject()
         assertThat(villain.realm).hasSize(4)
-        val expectedLocationActionSpaceSizes = listOf(4, 4, 4, 3)
+        val expectedLocationActionSpaceSizes = listOf(4, 4, 4, 4)
         villain.realm.forEachIndexed { i, location ->
             assertThat(location.actionSpaceSlots).hasSize(
                 expectedLocationActionSpaceSizes[i]

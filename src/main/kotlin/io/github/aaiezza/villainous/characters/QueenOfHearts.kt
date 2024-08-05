@@ -43,61 +43,59 @@ class QueenOfHeartsVillainCard {
 typealias VillainCard_QueenOfHearts_CardGuard = QueenOfHeartsVillainCard.CardGuard
 
 
-class QueenOfHeartsBoardGenerator : CharacterBoardGenerator {
-    override fun invoke(): Board {
-        return Board(
-            villainCharacter = VillainCharacter(
-                VillainCharacter.Name("Queen of Hearts"),
-                VillainCharacter.Objective(
-                    "Have a Wicket at each location and successfully take a shot."
-                ),
-                VillainousExpansion.THE_WORST_TAKES_IT_ALL
+val QueenOfHeartsBoard = {
+    Board(
+        villainCharacter = VillainCharacter(
+            VillainCharacter.Name("Queen of Hearts"),
+            VillainCharacter.Objective(
+                "Have a Wicket at each location and successfully take a shot."
             ),
-            realm = Realm(
-                Location(
-                    name = Location.Name("Courtyard"),
-                    actionSpaceSlots = listOf(
-                        DISCARD().coverable(),
-                        MOVE_AN_ITEM_OR_ALLY().coverable(),
-                        GAIN_POWER(2u).notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Hedge Maze"),
-                    actionSpaceSlots = listOf(
-                        PLAY_CARD().coverable(),
-                        ACTIVATE().coverable(),
-                        GAIN_POWER(3u).notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Tulgey Wood"),
-                    actionSpaceSlots = listOf(
-                        FATE().coverable(),
-                        PLAY_CARD().coverable(),
-                        DISCARD().notCoverable(),
-                        VANQUISH().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("White Rabbit's House"),
-                    actionSpaceSlots = listOf(
-                        PLAY_CARD().coverable(),
-                        GAIN_POWER(1u).coverable(),
-                        ACTIVATE().notCoverable(),
-                        FATE().notCoverable(),
-                    )
-                ),
+            VillainousExpansion.THE_WORST_TAKES_IT_ALL
+        ),
+        realm = Realm(
+            Location(
+                name = Location.Name("Courtyard"),
+                actionSpaceSlots = listOf(
+                    DISCARD().coverable(),
+                    MOVE_AN_ITEM_OR_ALLY().coverable(),
+                    GAIN_POWER(2u).notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                )
             ),
-            villainDeck = QUEEN_OF_HEARTS_VILLIAN_DECK(),
-            fateDeck = QUEEN_OF_HEARTS_FATE_DECK()
-        )
-    }
+            Location(
+                name = Location.Name("Hedge Maze"),
+                actionSpaceSlots = listOf(
+                    PLAY_CARD().coverable(),
+                    ACTIVATE().coverable(),
+                    GAIN_POWER(3u).notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                )
+            ),
+            Location(
+                name = Location.Name("Tulgey Wood"),
+                actionSpaceSlots = listOf(
+                    FATE().coverable(),
+                    PLAY_CARD().coverable(),
+                    DISCARD().notCoverable(),
+                    VANQUISH().notCoverable(),
+                )
+            ),
+            Location(
+                name = Location.Name("White Rabbit's House"),
+                actionSpaceSlots = listOf(
+                    PLAY_CARD().coverable(),
+                    GAIN_POWER(1u).coverable(),
+                    ACTIVATE().notCoverable(),
+                    FATE().notCoverable(),
+                )
+            ),
+        ),
+        getVillainDeck = QUEEN_OF_HEARTS_VILLAIN_DECK,
+        getFateDeck = QUEEN_OF_HEARTS_FATE_DECK
+    )
 }
 
-val QUEEN_OF_HEARTS_VILLIAN_DECK = {
+val QUEEN_OF_HEARTS_VILLAIN_DECK = {
     listOf(
         {
             VillainCard_QueenOfHearts_CardGuard(
@@ -344,3 +342,10 @@ val QUEEN_OF_HEARTS_FATE_DECK = {
         } to 1,
     ).duplicateCards().let { FateCard.Deck(it) }
 }
+
+class QueenOfHeartsSpecificBoardState : Board.State.VillainSpecific
+
+class QueenOfHeartsBoardStateGenerator : CharacterBoardStateGenerator {
+    override fun invoke(): Board.State = Board.State(QueenOfHeartsBoard()) { QueenOfHeartsSpecificBoardState() }
+}
+

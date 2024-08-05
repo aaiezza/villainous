@@ -13,62 +13,61 @@ import io.github.aaiezza.villainous.Card.Description
 import io.github.aaiezza.villainous.Card.Name
 import io.github.aaiezza.villainous.Realm.Location
 
-class JafarBoardGenerator : CharacterBoardGenerator {
-    override fun invoke(): Board {
-        return Board(
-            villainCharacter = VillainCharacter(
-                VillainCharacter.Name("Jafar"),
-                VillainCharacter.Objective(
-                    "Start your turn with the Magic Lamp at Sultan's Palace " +
-                            "and Genie under your control."
-                ),
-                VillainousExpansion.THE_WORST_TAKES_IT_ALL
+val JafarBoard = {
+    Board(
+        villainCharacter = VillainCharacter(
+            VillainCharacter.Name("Jafar"),
+            VillainCharacter.Objective(
+                "Start your turn with the Magic Lamp at Sultan's Palace " +
+                        "and Genie under your control."
             ),
-            realm = Realm(
-                Location(
-                    name = Location.Name("Sultan's Palace"),
-                    actionSpaceSlots = listOf(
-                        PLAY_CARD().coverable(),
-                        ACTIVATE().coverable(),
-                        VANQUISH().notCoverable(),
-                        FATE().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Streets of Agrabah"),
-                    actionSpaceSlots = listOf(
-                        GAIN_POWER(1u).coverable(),
-                        FATE().coverable(),
-                        DISCARD().notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Oasis"),
-                    actionSpaceSlots = listOf(
-                        ACTIVATE().coverable(),
-                        PLAY_CARD().coverable(),
-                        GAIN_POWER(3u).notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Location.Lockable.Locked(
-                    name = Location.Name("Cave of Wonders"),
-                    actionSpaceSlots = listOf(
-                        DISCARD().coverable(),
-                        GAIN_POWER(2u).coverable(),
-                        PLAY_CARD().notCoverable(),
-                        MOVE_AN_ITEM_OR_ALLY().notCoverable(),
-                    )
-                ),
+            VillainousExpansion.THE_WORST_TAKES_IT_ALL
+        ),
+        realm = Realm(
+            Location(
+                name = Location.Name("Sultan's Palace"),
+                actionSpaceSlots = listOf(
+                    PLAY_CARD().coverable(),
+                    ACTIVATE().coverable(),
+                    VANQUISH().notCoverable(),
+                    FATE().notCoverable(),
+                )
             ),
-            villainDeck = JAFAR_VILLIAN_DECK(),
-            fateDeck = JAFAR_FATE_DECK()
-        )
-    }
+            Location(
+                name = Location.Name("Streets of Agrabah"),
+                actionSpaceSlots = listOf(
+                    GAIN_POWER(1u).coverable(),
+                    FATE().coverable(),
+                    DISCARD().notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                )
+            ),
+            Location(
+                name = Location.Name("Oasis"),
+                actionSpaceSlots = listOf(
+                    ACTIVATE().coverable(),
+                    PLAY_CARD().coverable(),
+                    GAIN_POWER(3u).notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                )
+            ),
+            Location.Lockable(
+                name = Location.Name("Cave of Wonders"),
+                actionSpaceSlots = listOf(
+                    DISCARD().coverable(),
+                    GAIN_POWER(2u).coverable(),
+                    PLAY_CARD().notCoverable(),
+                    MOVE_AN_ITEM_OR_ALLY().notCoverable(),
+                )
+            ),
+        ),
+        getLockedLocations = LOCK_LAST_LOCATION,
+        getVillainDeck = JAFAR_VILLAIN_DECK,
+        getFateDeck = JAFAR_FATE_DECK
+    )
 }
 
-val JAFAR_VILLIAN_DECK = {
+val JAFAR_VILLAIN_DECK = {
     listOf(
         {
             VillainCard.Standard.Effect(
@@ -143,7 +142,7 @@ val JAFAR_VILLIAN_DECK = {
                             "That Hero is under your control and treated as an Ally with the same Strength." +
                             "Ignore their Ability. The Cost to play Hypnotize is equal to the Hero's Strength."
                 ),
-                cost = Card.Cost.Variable()
+                cost = Card.Cost.Variable
             )
         } to 2,
         {
@@ -332,4 +331,10 @@ val JAFAR_FATE_DECK = {
             )
         } to 1,
     ).duplicateCards().let { FateCard.Deck(it) }
+}
+
+class JafarSpecificBoardState : Board.State.VillainSpecific
+
+class JafarBoardStateGenerator : CharacterBoardStateGenerator {
+    override fun invoke(): Board.State = Board.State(JafarBoard()) { JafarSpecificBoardState() }
 }

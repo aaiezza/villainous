@@ -1,14 +1,12 @@
 package io.github.aaiezza.villainous.characters
 
 import io.github.aaiezza.villainous.*
-import io.github.aaiezza.villainous.ActionSpace.Standard.ACTIVATE
 import io.github.aaiezza.villainous.ActionSpace.Standard.DISCARD
 import io.github.aaiezza.villainous.ActionSpace.Standard.FATE
 import io.github.aaiezza.villainous.ActionSpace.Standard.GAIN_POWER
 import io.github.aaiezza.villainous.ActionSpace.Standard.MOVE_AN_ITEM_OR_ALLY
 import io.github.aaiezza.villainous.ActionSpace.Standard.PLAY_CARD
 import io.github.aaiezza.villainous.ActionSpace.Standard.VANQUISH
-import io.github.aaiezza.villainous.ActionSpace.Standard.withCost
 import io.github.aaiezza.villainous.Card.Description
 import io.github.aaiezza.villainous.Card.Name
 import io.github.aaiezza.villainous.Realm.Location
@@ -16,38 +14,9 @@ import io.github.aaiezza.villainous.Realm.Location.Section.Companion.buildSectio
 import io.github.aaiezza.villainous.characters.KingCandyActionSpace.Companion.GAIN_POWER_INTERSECTION
 import io.github.aaiezza.villainous.characters.KingCandyActionSpace.Companion.START_FINISH
 
-class KingCandyVillainCard {
-    open class CardGuard(
-        name: Name,
-        cost: Card.Cost,
-        strength: Strength,
-        attachments: List<Card.Placeable.ToCard> = emptyList(),
-    ) : VillainCard.Standard.Ally(
-        name,
-        Description("Convert this Card Guard to a Wicket or back to a Card Guard."),
-        cost,
-        strength,
-        attachments,
-        actionSpaceSlots = listOf(ACTIVATE().withCost(1).notCoverable())
-    ) {
-        open fun toggleWicket(): CardGuard = Wicket(name, cost, strength, attachments)
-
-        class Wicket(
-            name: Name,
-            cost: Card.Cost,
-            unusableStrength: Strength,
-            attachments: List<Card.Placeable.ToCard> = emptyList(),
-        ) : CardGuard(name, cost, unusableStrength, attachments) {
-            override fun toggleWicket() = CardGuard(name, cost, strength, attachments)
-        }
-    }
-}
-
-//typealias VillainCard_QueenOfHearts_CardGuard = QueenOfHeartsVillainCard.CardGuard
-
 class KingCandyActionSpace {
     companion object {
-        class StartFinish : ActionSpace.Standard.PlayCard()
+        class StartFinish : ActionSpace.Standard.PlayCard("Start/Finish")
 
         val START_FINISH = { StartFinish() }
 
@@ -55,59 +24,58 @@ class KingCandyActionSpace {
     }
 }
 
-class KingCandyBoardGenerator : CharacterBoardGenerator {
-    override fun invoke(): Board {
-        return Board(
-            villainCharacter = VillainCharacter(
-                VillainCharacter.Name("King Candy"),
-                VillainCharacter.Objective(
-                    "Pass Start/Finish with a Glitch attached to Vanellope Von Schweetz."
-                ),
-                VillainousExpansion.SUGAR_AND_SPITE
+val KingCandyBoard = {
+    Board(
+        villainCharacter = VillainCharacter(
+            VillainCharacter.Name("King Candy"),
+            VillainCharacter.Objective(
+                "Pass Start/Finish with a Glitch attached to Vanellope Von Schweetz."
             ),
-            realm = Realm(
-                Location(
-                    name = Location.Name("Sugar Rush Speedway"),
-                    actionSpaceSlots = listOf(
-                        START_FINISH().notCoverable(),
+            VillainousExpansion.SUGAR_AND_SPITE
+        ),
+        realm = Realm(
+            Location(
+                name = Location.Name("Sugar Rush Speedway"),
+                actionSpaceSlots = listOf(
+                    START_FINISH().notCoverable(),
 
-                        FATE().coverable(Location.Section.Id(0u)),
+                    FATE().coverable(Location.Section.Id(0u)),
 
-                        DISCARD().coverable(Location.Section.Id(1u)),
-                        PLAY_CARD().coverable(Location.Section.Id(1u)),
+                    DISCARD().coverable(Location.Section.Id(1u)),
+                    PLAY_CARD().coverable(Location.Section.Id(1u)),
 
-                        GAIN_POWER_INTERSECTION,
+                    GAIN_POWER_INTERSECTION,
 
-                        PLAY_CARD().notCoverable(),
-                        DISCARD().notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                    DISCARD().notCoverable(),
 
-                        MOVE_AN_ITEM_OR_ALLY().notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                        GAIN_POWER(2u).notCoverable(),
+                    MOVE_AN_ITEM_OR_ALLY().notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                    GAIN_POWER(2u).notCoverable(),
 
-                        FATE().coverable(Location.Section.Id(3u)),
+                    FATE().coverable(Location.Section.Id(3u)),
 
-                        DISCARD().coverable(Location.Section.Id(2u)),
-                        PLAY_CARD().coverable(Location.Section.Id(2u)),
+                    DISCARD().coverable(Location.Section.Id(2u)),
+                    PLAY_CARD().coverable(Location.Section.Id(2u)),
 
-                        GAIN_POWER_INTERSECTION,
+                    GAIN_POWER_INTERSECTION,
 
-                        PLAY_CARD().notCoverable(),
-                        FATE().notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                    FATE().notCoverable(),
 
-                        VANQUISH().notCoverable(),
-                        DISCARD().notCoverable(),
-                    ),
-                    sections = buildSections(4u)
+                    VANQUISH().notCoverable(),
+                    DISCARD().notCoverable(),
                 ),
+                sections = buildSections(4u)
             ),
-            villainDeck = KING_CANDY_VILLIAN_DECK(),
-            fateDeck = KING_CANDY_FATE_DECK()
-        )
-    }
+        ),
+        getVillainMoverLocation = { it.realm[0].actionSpaceSlots[0] },
+        getVillainDeck = KING_CANDY_VILLAIN_DECK,
+        getFateDeck = KING_CANDY_FATE_DECK
+    )
 }
 
-val KING_CANDY_VILLIAN_DECK = {
+val KING_CANDY_VILLAIN_DECK = {
     listOf(
         {
             VillainCard.Standard.Ally(
@@ -226,7 +194,7 @@ val KING_CANDY_VILLIAN_DECK = {
                             "a Play a Card action. Pay up to 6 Power and move " +
                             "King Candy forward that number of action spaces."
                 ),
-                cost = Card.Cost.Variable()
+                cost = Card.Cost.Variable
             )
         } to 1,
         {
@@ -374,4 +342,10 @@ val KING_CANDY_FATE_DECK = {
             )
         } to 1,
     ).duplicateCards().let { FateCard.Deck(it) }
+}
+
+class KingCandySpecificBoardState : Board.State.VillainSpecific
+
+class KingCandyBoardStateGenerator : CharacterBoardStateGenerator {
+    override fun invoke(): Board.State = Board.State(KingCandyBoard()) { KingCandySpecificBoardState() }
 }

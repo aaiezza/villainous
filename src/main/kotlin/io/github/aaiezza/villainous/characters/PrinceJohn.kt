@@ -11,58 +11,56 @@ import io.github.aaiezza.villainous.Card.Description
 import io.github.aaiezza.villainous.Card.Name
 import io.github.aaiezza.villainous.Realm.Location
 
-class PrinceJohnBoardGenerator : CharacterBoardGenerator {
-    override fun invoke(): Board {
-        return Board(
-            villainCharacter = VillainCharacter(
-                VillainCharacter.Name("Prince John"),
-                VillainCharacter.Objective("Start your turn with at least 20 power."),
-                VillainousExpansion.THE_WORST_TAKES_IT_ALL
+val PrinceJohnBoard = {
+    Board(
+        villainCharacter = VillainCharacter(
+            VillainCharacter.Name("Prince John"),
+            VillainCharacter.Objective("Start your turn with at least 20 power."),
+            VillainousExpansion.THE_WORST_TAKES_IT_ALL
+        ),
+        realm = Realm(
+            Location(
+                name = Location.Name("Sherwood Forest"),
+                actionSpaceSlots = listOf(
+                    GAIN_POWER(1u).coverable(),
+                    DISCARD().coverable(),
+                    PLAY_CARD().notCoverable(),
+                    FATE().notCoverable(),
+                )
             ),
-            realm = Realm(
-                Location(
-                    name = Location.Name("Sherwood Forest"),
-                    actionSpaceSlots = listOf(
-                        GAIN_POWER(1u).coverable(),
-                        DISCARD().coverable(),
-                        PLAY_CARD().notCoverable(),
-                        FATE().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Friar Tuck's Church"),
-                    actionSpaceSlots = listOf(
-                        GAIN_POWER(2u).coverable(),
-                        PLAY_CARD().coverable(),
-                        PLAY_CARD().notCoverable(),
-                        MOVE_AN_ITEM_OR_ALLY().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("Nottingham"),
-                    actionSpaceSlots = listOf(
-                        FATE().coverable(),
-                        GAIN_POWER(1u).coverable(),
-                        VANQUISH().notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Location(
-                    name = Location.Name("The Jail"),
-                    actionSpaceSlots = listOf(
-                        GAIN_POWER(3u).notCoverable(),
-                        PLAY_CARD().notCoverable(),
-                        DISCARD().notCoverable(),
-                    )
-                ),
+            Location(
+                name = Location.Name("Friar Tuck's Church"),
+                actionSpaceSlots = listOf(
+                    GAIN_POWER(2u).coverable(),
+                    PLAY_CARD().coverable(),
+                    PLAY_CARD().notCoverable(),
+                    MOVE_AN_ITEM_OR_ALLY().notCoverable(),
+                )
             ),
-            villainDeck = PRINCE_JOHN_VILLIAN_DECK(),
-            fateDeck = PRINCE_JOHN_FATE_DECK()
-        )
-    }
+            Location(
+                name = Location.Name("Nottingham"),
+                actionSpaceSlots = listOf(
+                    FATE().coverable(),
+                    GAIN_POWER(1u).coverable(),
+                    VANQUISH().notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                )
+            ),
+            Location(
+                name = Location.Name("The Jail"),
+                actionSpaceSlots = listOf(
+                    GAIN_POWER(3u).notCoverable(),
+                    PLAY_CARD().notCoverable(),
+                    DISCARD().notCoverable(),
+                )
+            ),
+        ),
+        getVillainDeck = PRINCE_JOHN_VILLAIN_DECK,
+        getFateDeck = PRINCE_JOHN_FATE_DECK
+    )
 }
 
-val PRINCE_JOHN_VILLIAN_DECK = {
+val PRINCE_JOHN_VILLAIN_DECK = {
     listOf(
         {
             VillainCard.Standard.Effect(
@@ -319,3 +317,10 @@ val PRINCE_JOHN_FATE_DECK = {
         } to 1,
     ).duplicateCards().let { FateCard.Deck(it) }
 }
+
+class PrinceJohnSpecificBoardState : Board.State.VillainSpecific
+
+class PrinceJohnBoardStateGenerator : CharacterBoardStateGenerator {
+    override fun invoke(): Board.State = Board.State(PrinceJohnBoard()) { PrinceJohnSpecificBoardState() }
+}
+

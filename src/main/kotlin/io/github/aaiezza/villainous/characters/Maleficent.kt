@@ -12,59 +12,57 @@ class MaleficentVillainCard {
 
 typealias VillainCard_Maleficent_Curse = MaleficentVillainCard.Curse
 
-class MaleficentBoardGenerator : CharacterBoardGenerator {
-    override fun invoke(): Board {
-        return Board(
-            villainCharacter = VillainCharacter(
-                VillainCharacter.Name("Maleficent"),
-                VillainCharacter.Objective("Start your turn with a Curse at each location."),
-                VillainousExpansion.THE_WORST_TAKES_IT_ALL
+val MaleficentBoard = {
+    Board(
+        villainCharacter = VillainCharacter(
+            VillainCharacter.Name("Maleficent"),
+            VillainCharacter.Objective("Start your turn with a Curse at each location."),
+            VillainousExpansion.THE_WORST_TAKES_IT_ALL
+        ),
+        realm = Realm(
+            Realm.Location(
+                name = Realm.Location.Name("Forbidden Mountains"),
+                actionSpaceSlots = listOf(
+                    ActionSpace.MOVE_AN_ITEM_OR_ALLY().coverable(),
+                    ActionSpace.PLAY_CARD().coverable(),
+                    ActionSpace.GAIN_POWER(1u).notCoverable(),
+                    ActionSpace.FATE().notCoverable(),
+                )
             ),
-            realm = Realm(
-                Realm.Location(
-                    name = Realm.Location.Name("Forbidden Mountains"),
-                    actionSpaceSlots = listOf(
-                        ActionSpace.MOVE_AN_ITEM_OR_ALLY().coverable(),
-                        ActionSpace.PLAY_CARD().coverable(),
-                        ActionSpace.GAIN_POWER(1u).notCoverable(),
-                        ActionSpace.FATE().notCoverable(),
-                    )
-                ),
-                Realm.Location(
-                    name = Realm.Location.Name("Briar Rose's Cottage"),
-                    actionSpaceSlots = listOf(
-                        ActionSpace.GAIN_POWER(2u).coverable(),
-                        ActionSpace.MOVE_AN_ITEM_OR_ALLY().coverable(),
-                        ActionSpace.PLAY_CARD().notCoverable(),
-                        ActionSpace.DISCARD().notCoverable(),
-                    )
-                ),
-                Realm.Location(
-                    name = Realm.Location.Name("The Forest"),
-                    actionSpaceSlots = listOf(
-                        ActionSpace.DISCARD().coverable(),
-                        ActionSpace.PLAY_CARD().coverable(),
-                        ActionSpace.GAIN_POWER(3u).notCoverable(),
-                        ActionSpace.PLAY_CARD().notCoverable(),
-                    )
-                ),
-                Realm.Location(
-                    name = Realm.Location.Name("King Stefan's Castle"),
-                    actionSpaceSlots = listOf(
-                        ActionSpace.GAIN_POWER(1u).coverable(),
-                        ActionSpace.FATE().coverable(),
-                        ActionSpace.VANQUISH().notCoverable(),
-                        ActionSpace.PLAY_CARD().notCoverable(),
-                    )
-                ),
+            Realm.Location(
+                name = Realm.Location.Name("Briar Rose's Cottage"),
+                actionSpaceSlots = listOf(
+                    ActionSpace.GAIN_POWER(2u).coverable(),
+                    ActionSpace.MOVE_AN_ITEM_OR_ALLY().coverable(),
+                    ActionSpace.PLAY_CARD().notCoverable(),
+                    ActionSpace.DISCARD().notCoverable(),
+                )
             ),
-            villainDeck = MALEFICENT_VILLIAN_DECK(),
-            fateDeck = MALEFICENT_FATE_DECK()
-        )
-    }
+            Realm.Location(
+                name = Realm.Location.Name("The Forest"),
+                actionSpaceSlots = listOf(
+                    ActionSpace.DISCARD().coverable(),
+                    ActionSpace.PLAY_CARD().coverable(),
+                    ActionSpace.GAIN_POWER(3u).notCoverable(),
+                    ActionSpace.PLAY_CARD().notCoverable(),
+                )
+            ),
+            Realm.Location(
+                name = Realm.Location.Name("King Stefan's Castle"),
+                actionSpaceSlots = listOf(
+                    ActionSpace.GAIN_POWER(1u).coverable(),
+                    ActionSpace.FATE().coverable(),
+                    ActionSpace.VANQUISH().notCoverable(),
+                    ActionSpace.PLAY_CARD().notCoverable(),
+                )
+            ),
+        ),
+        getVillainDeck = MALEFICENT_VILLAIN_DECK,
+        getFateDeck = MALEFICENT_FATE_DECK,
+    )
 }
 
-val MALEFICENT_VILLIAN_DECK = {
+val MALEFICENT_VILLAIN_DECK = {
     listOf(
         {
             VillainCard.Standard.Ally(
@@ -283,4 +281,10 @@ val MALEFICENT_FATE_DECK = {
             )
         } to 1,
     ).duplicateCards().let { FateCard.Deck(it) }
+}
+
+class MaleficentSpecificBoardState : Board.State.VillainSpecific
+
+class MaleficentBoardStateGenerator : CharacterBoardStateGenerator {
+    override fun invoke(): Board.State = Board.State(board = MaleficentBoard()) { MaleficentSpecificBoardState() }
 }

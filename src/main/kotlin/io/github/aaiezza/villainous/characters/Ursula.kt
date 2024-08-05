@@ -27,9 +27,8 @@ class UrsulaVillainCard {
 
 typealias VillainCard_Ursula_BindingContract = UrsulaVillainCard.BindingContract
 
-class UrsulaBoardGenerator : CharacterBoardGenerator {
-    override fun invoke(): Board {
-        return Board(
+val UrsulaBoard = {
+    Board(
             villainCharacter = VillainCharacter(
                 VillainCharacter.Name("Ursula"),
                 VillainCharacter.Objective(
@@ -38,7 +37,7 @@ class UrsulaBoardGenerator : CharacterBoardGenerator {
                 VillainousExpansion.THE_WORST_TAKES_IT_ALL
             ),
             realm = Realm(
-                Location.Lockable.Unlocked(
+                Location.Lockable(
                     name = Location.Name("Ursula's Lair"),
                     actionSpaceSlots = listOf(
                         GAIN_POWER(1u).coverable(),
@@ -65,7 +64,7 @@ class UrsulaBoardGenerator : CharacterBoardGenerator {
                         PLAY_CARD().notCoverable(),
                     )
                 ),
-                Location.Lockable.Locked(
+                Location.Lockable(
                     name = Location.Name("The Palace"),
                     actionSpaceSlots = listOf(
                         MOVE_AN_ITEM_OR_ALLY().coverable(),
@@ -75,13 +74,13 @@ class UrsulaBoardGenerator : CharacterBoardGenerator {
                     )
                 ),
             ),
-            villainDeck = URSULA_VILLIAN_DECK(),
-            fateDeck = URSULA_FATE_DECK()
+            getLockedLocations = { listOf(it.realm.filterIsInstance<Location.Lockable>().last()) },
+            getVillainDeck = URSULA_VILLAIN_DECK,
+            getFateDeck = URSULA_FATE_DECK
         )
     }
-}
 
-val URSULA_VILLIAN_DECK = {
+val URSULA_VILLAIN_DECK = {
     listOf(
         {
             VillainCard_Ursula_BindingContract(
@@ -337,4 +336,10 @@ val URSULA_FATE_DECK = {
             )
         } to 1,
     ).duplicateCards().let { FateCard.Deck(it) }
+}
+
+class UrsulaSpecificBoardState : Board.State.VillainSpecific
+
+class UrsulaBoardStateGenerator : CharacterBoardStateGenerator {
+    override fun invoke(): Board.State = Board.State(board = UrsulaBoard()) { UrsulaSpecificBoardState() }
 }

@@ -1,22 +1,74 @@
 package io.github.aaiezza.villainous
 
-data class VillainousBoardState(
-    val boards: List<Board>,
-)
-
 data class Board(
     val villainCharacter: VillainCharacter,
     val realm: Realm,
+    val getLockedLocations: (Board) -> List<Realm.Location.Lockable> = { emptyList() },
+    val getVillainMoverLocation: (Board) -> VillainMoverLocation = { it.realm[0] },
 
-    val powerTokens: Power = Power(0),
-    val hand: VillainCard.Hand = VillainCard.Hand(),
+    // TODO: Should hands, discard piles, and fate decks bne interfaces,
+    //  and each one unique to each villain, _even_ though they are
+    //  often going to be the same thing?
+    //  The card types already are extendable per villain. Perhaps that is enough.
+    //  The domain would specify that the behaviors of these domain objects
+    //  does not deviate from villain to villain _much_.
+    //  Example: Jafar has a Fate Card (Jasmine) that, when in play, reduces
+    //  Jafar's hand limit by 1.
+    //  Perhaps this is grounds for extending these domain objects and forcing the
+    //  villain to create their own version of the hand.
+    //  REGARDLESS, these "non-static", state-based domain objects merely need to be generated,
+    //  and then passed TO the Board.State object, which will hold the context of their changing
+    //  state. Including their contents and order.
+    //  Individually, they do seem to possess certain properties that may be worth interfacing
+    //  to allow a villain's specific gameplay nature to be captured in their own subclass.
 
-    val villainDeck: VillainCard.Deck = VillainCard.Deck(),
-    val villainDiscardPile: VillainCard.DiscardPile = VillainCard.DiscardPile(),
-    val fateDeck: FateCard.Deck = FateCard.Deck(),
-    val fateDiscardPile: FateCard.DiscardPile = FateCard.DiscardPile(),
-    val fateToken: FateToken? = null,
-)
+    // TODO: Also may not want to provide default implementations of getters here.
+    //  Something that obviously wouldn't work anyways if these domain objects needed to be extended.
+    val getHand: () -> VillainCard.Hand = { VillainCard.Hand() },
+
+    val getVillainDeck: () -> VillainCard.Deck = { VillainCard.Deck() },
+    val getVillainDiscardPile: () -> VillainCard.DiscardPile = { VillainCard.DiscardPile() },
+    val getFateDeck: () -> FateCard.Deck = { FateCard.Deck() },
+    val getFateDiscardPile: () -> FateCard.DiscardPile = { FateCard.DiscardPile() },
+) {
+    data class State private constructor(
+        val board: Board,
+        val lockedLocations: List<Realm.Location.Lockable>,
+        val villainMoverLocation: VillainMoverLocation,
+        val powerTokens: Power = Power(0),
+        val hand: VillainCard.Hand,
+        val villainDeck: VillainCard.Deck,
+        val villainDiscardPile: VillainCard.DiscardPile,
+        val fateDeck: FateCard.Deck,
+        val fateDiscardPile: FateCard.DiscardPile,
+        val fateToken: FateToken? = null,
+        val villainSpecificState: Board.State.VillainSpecific,
+    ) {
+        constructor (
+            board: Board,
+            getVillainSpecificState: (Board) -> Board.State.VillainSpecific,
+        ) : this(
+            board = board,
+            lockedLocations = board.getLockedLocations(board),
+            villainMoverLocation = board.getVillainMoverLocation(board),
+            hand = board.getHand(),
+            villainDeck = board.getVillainDeck(),
+            villainDiscardPile = board.getVillainDiscardPile(),
+            fateDeck = board.getFateDeck(),
+            fateDiscardPile = board.getFateDiscardPile(),
+            fateToken = null,
+            villainSpecificState = getVillainSpecificState(board)
+        )
+
+        val villainCharacter get() = board.villainCharacter
+        val realm get() = board.realm
+
+        interface VillainSpecific
+
+    }
+}
+
+interface VillainMoverLocation
 
 enum class VillainousExpansion(val value: String) {
     THE_WORST_TAKES_IT_ALL("The Worst Takes it All"),
@@ -26,14 +78,61 @@ enum class VillainousExpansion(val value: String) {
     PERFECTLY_WRETCHED("Perfectly Wretched"),
     DESPICABLE_PLOTS("Despicable Plots"),
     FILLED_WITH_FRIGHT("Filled With Fright"),
-    SUGAR_AND_SPITE("Sugar and Spite");
+    SUGAR_AND_SPITE(  "Sugar and Spite");
 }
 
 data class VillainCharacter(val name: Name, val objective: Objective, val villainousExpansion: VillainousExpansion) {
     data class Name(val value: String)
     data class Objective(val value: String)
+}
 
-    class VillainMover
+data class Realm(val value: List<Location>) : List<Realm.Location> by value {
+    constructor(vararg locations: Location) : this(locations.toList())
+
+    open class Location(
+        open val name: Name,
+        open val actionSpaceSlots: List<ActionSpaceSlot>,
+        open val sections: List<Section>,
+    ) : VillainMoverLocation {
+        // Standard Single Section Location
+        constructor(
+            name: Name,
+            actionSpaceSlots: List<ActionSpaceSlot>,
+        ) : this(name, actionSpaceSlots, listOf(Section(Section.Id(0u))))
+
+        data class Name(val value: String) {
+            override fun toString() = value
+        }
+
+        data class Lockable(
+            override val name: Name,
+            override val actionSpaceSlots: List<ActionSpaceSlot>,
+            override val sections: List<Section> = listOf(Section(Section.Id(0u))),
+        ) : Location(name, actionSpaceSlots, sections)
+
+        data class Section(
+            val id: Id = Id(0u),
+        ) {
+            data class Id(val value: UInt)
+
+            companion object {
+                fun buildSections(numberOfSections: UInt) =
+                    (0..numberOfSections.toInt()).map { Section(Id(it.toUInt())) }
+            }
+        }
+
+        sealed interface ActionSpaceSlot : VillainMoverLocation {
+            val actionSpace: ActionSpace
+
+            data class CoverableActionSpaceSlot(
+                override val actionSpace: ActionSpace,
+                val isCovered: Boolean = false,
+                val coverableBySection: Section.Id = Section.Id(0u)
+            ) : ActionSpaceSlot
+
+            data class NotCoverableActionSpaceSlot(override val actionSpace: ActionSpace) : ActionSpaceSlot
+        }
+    }
 }
 
 interface Card {
@@ -45,7 +144,7 @@ interface Card {
 
     sealed interface Cost {
         data class Known(val value: Power) : Cost
-        class Variable : Cost
+        data object Variable : Cost
     }
 
     interface WithCost : Card {
@@ -82,9 +181,7 @@ data class Strength(val value: Int) {
 interface VillainCard : Card {
     object Standard {
         data class Effect(
-            override val name: Card.Name,
-            override val description: Card.Description,
-            override val cost: Card.Cost
+            override val name: Card.Name, override val description: Card.Description, override val cost: Card.Cost
         ) : VillainCard, Card.WithCost
 
         val EFFECT = ::Effect
@@ -213,9 +310,7 @@ interface FateCard : Card {
         val HERO = ::Hero
 
         data class Item internal constructor(
-            override val name: Card.Name,
-            override val description: Card.Description,
-            val effect: Effect? = null
+            override val name: Card.Name, override val description: Card.Description, val effect: Effect? = null
         ) : VillainCard, Card.Placeable.ToLocation, Card.Placeable.ToCard {
             interface Effect {
                 data class AddStrengthToHero(val strength: Strength) : Effect
@@ -230,146 +325,6 @@ interface FateCard : Card {
 }
 
 class FateToken
-
-data class Realm(val value: List<Location>) : List<Realm.Location> by value {
-    constructor(vararg locations: Location) : this(locations.toList())
-
-    open class Location(
-        open val name: Name,
-        open val actionSpaceSlots: List<ActionSpaceSlot>,
-        open val sections: List<Section>,
-    ) {
-        // Standard Single Section Location
-        constructor(
-            name: Name,
-            actionSpaceSlots: List<ActionSpaceSlot>,
-            fateCards: List<FateCard> = emptyList(),
-            villainCards: List<VillainCard> = emptyList()
-        ) : this(name, actionSpaceSlots, listOf(Section(Section.Id(0u), fateCards, villainCards)))
-
-        open fun addFateCard(fateCard: FateCard) = addFateCard(fateCard, Section.Id(0u))
-        open fun addFateCard(fateCard: FateCard, sectionId: Section.Id) =
-            Location(name, actionSpaceSlots, sections.map {
-                if (it.id == sectionId)
-                    it.addFateCard(fateCard)
-                else it
-            })
-
-        open fun addVillainCard(villainCard: VillainCard) = addVillainCard(villainCard, Section.Id(0u))
-        open fun addVillainCard(villainCard: VillainCard, sectionId: Section.Id = Section.Id(0u)) =
-            Location(name, actionSpaceSlots, sections.map {
-                if (it.id == sectionId)
-                    it.addVillainCard(villainCard)
-                else it
-            })
-
-        data class Name(val value: String) {
-            override fun toString() = value
-        }
-
-        data class Section(
-            val id: Id = Id(0u),
-            val fateCards: List<FateCard> = emptyList(),
-            val villainCards: List<VillainCard> = emptyList(),
-        ) {
-            fun addFateCard(fateCard: FateCard) =
-                Section(id, fateCards + fateCard, villainCards)
-
-            fun addVillainCard(villainCard: VillainCard) =
-                Section(id, fateCards, villainCards + villainCard)
-
-            data class Id(val value: UInt)
-
-            companion object {
-                fun buildSections(numberOfSections: UInt) =
-                    (0..numberOfSections.toInt()).map { Section(Id(it.toUInt())) }
-            }
-        }
-
-        sealed interface ActionSpaceSlot {
-            val actionSpace: ActionSpace
-
-            data class CoverableActionSpaceSlot(
-                override val actionSpace: ActionSpace,
-                val isCovered: Boolean = false,
-                val coverableBySection: Section.Id = Section.Id(0u)
-            ) : ActionSpaceSlot
-
-            data class NotCoverableActionSpaceSlot(override val actionSpace: ActionSpace) : ActionSpaceSlot
-        }
-
-        sealed class Lockable(
-            override val name: Name,
-            override val actionSpaceSlots: List<ActionSpaceSlot>,
-            override val sections: List<Section>,
-        ) : Location(name, actionSpaceSlots, sections) {
-            abstract fun toggleLock(): Lockable
-            data class Locked(
-                override val name: Name,
-                override val actionSpaceSlots: List<ActionSpaceSlot>,
-                override val sections: List<Section>
-            ) : Lockable(name, actionSpaceSlots, sections) {
-                // Standard Single Section Location
-                constructor(
-                    name: Name,
-                    actionSpaceSlots: List<ActionSpaceSlot>,
-                    fateCards: List<FateCard> = emptyList(),
-                    villainCards: List<VillainCard> = emptyList()
-                ) : this(name, actionSpaceSlots, listOf(Section(Section.Id(0u), fateCards, villainCards)))
-
-                override fun toggleLock() = Unlocked(name, actionSpaceSlots, sections)
-
-                override fun addFateCard(fateCard: FateCard) = addFateCard(fateCard, Section.Id(0u))
-                override fun addFateCard(fateCard: FateCard, sectionId: Section.Id) =
-                    Locked(name, actionSpaceSlots, sections.map {
-                        if (it.id == sectionId)
-                            it.addFateCard(fateCard)
-                        else it
-                    })
-
-                override fun addVillainCard(villainCard: VillainCard) = addVillainCard(villainCard, Section.Id(0u))
-                override fun addVillainCard(villainCard: VillainCard, sectionId: Section.Id) =
-                    Locked(name, actionSpaceSlots, sections.map {
-                        if (it.id == sectionId)
-                            it.addVillainCard(villainCard)
-                        else it
-                    })
-            }
-
-            data class Unlocked(
-                override val name: Name,
-                override val actionSpaceSlots: List<ActionSpaceSlot>,
-                override val sections: List<Section>,
-            ) : Lockable(name, actionSpaceSlots, sections) {
-                // Standard Single Section Location
-                constructor(
-                    name: Name,
-                    actionSpaceSlots: List<ActionSpaceSlot>,
-                    fateCards: List<FateCard> = emptyList(),
-                    villainCards: List<VillainCard> = emptyList()
-                ) : this(name, actionSpaceSlots, listOf(Section(Section.Id(0u), fateCards, villainCards)))
-
-                override fun toggleLock() = Locked(name, actionSpaceSlots, sections)
-
-                override fun addFateCard(fateCard: FateCard) = addFateCard(fateCard, Section.Id(0u))
-                override fun addFateCard(fateCard: FateCard, sectionId: Section.Id) =
-                    Unlocked(name, actionSpaceSlots, sections.map {
-                        if (it.id == sectionId)
-                            it.addFateCard(fateCard)
-                        else it
-                    })
-
-                override fun addVillainCard(villainCard: VillainCard) = addVillainCard(villainCard, Section.Id(0u))
-                override fun addVillainCard(villainCard: VillainCard, sectionId: Section.Id) =
-                    Unlocked(name, actionSpaceSlots, sections.map {
-                        if (it.id == sectionId)
-                            it.addVillainCard(villainCard)
-                        else it
-                    })
-            }
-        }
-    }
-}
 
 interface ActionSpace {
     val actionName: String
@@ -395,8 +350,7 @@ interface ActionSpace {
 
         fun Activate.withCost(powerCost: Int) = ActivateAtCost(cost = CostToUse(Power(powerCost)))
         data class ActivateAtCost internal constructor(
-            override val actionName: String = "Activate",
-            override val cost: CostToUse
+            override val actionName: String = "Activate", override val cost: CostToUse
         ) : WithCost
 
         val ACTIVATE = { Activate() }
