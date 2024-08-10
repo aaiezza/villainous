@@ -3,6 +3,7 @@ package io.github.aaiezza.villainous.game
 import io.github.aaiezza.villainous.Board
 import io.github.aaiezza.villainous.game.Players.Companion.createPlayersFromList
 
+
 data class Game private constructor(val history: List<State>) {
     init {
         require(history.isNotEmpty()) { "Nope!" }
@@ -11,29 +12,97 @@ data class Game private constructor(val history: List<State>) {
     val currentState: State
         get() = history.last()
 
-    val startingPlayer: Player.State
+    val phase: Phase = currentState.phase
+
+    val currentPlayerState: Player.State = currentState.playerStates.single { it is Player.State.Active }
+
+    val startingPlayerState: Player.State
         get() = history.first().playerStates.toList()[0]
 
     constructor(
         playerStates: List<Player.State.Inactive>,
         startingPlayerIndex: Int = 0
-    ) : this(State(createPlayersFromList(playerStates, startingPlayerIndex)))
+    ) : this(State(createPlayersFromList(playerStates, startingPlayerIndex), phase = Phase.GamePhase.START_SET_UP))
 
     private constructor(initialGameState: State) : this(listOf(initialGameState))
 
-    fun progress(state: State): Game =
-        Game(history + state)
+    fun progressPhaseOnly(phase: Phase) = progress { it.copy(phase = phase) }
 
-    fun <R> mapIndexed(apply: (Int, Player.State) -> R) =
-        currentState.playerStates.map { p -> currentState.playerStates.single { it.villainCharacterName == p.villainCharacterName } }
-            .mapIndexed(apply)
+    fun progress(stateMover: (State) -> State = { it.copy(phase = phase) }): Game =
+        Game(history + stateMover(currentState))
 
-    fun <R> map(apply: (Player.State) -> R) =
-        currentState.playerStates.map { p -> currentState.playerStates.single { it.villainCharacterName == p.villainCharacterName } }
-            .map(apply)
+    fun mapIndexedPlayers(apply: (Int, Player.State) -> Player.State) =
+        currentState.playerStates.mapIndexed(apply).let { Players(it) }
 
-    data class Player(val username: Username) {
+    fun mapPlayers(apply: (Player.State) -> Player.State) =
+        currentState.playerStates.map(apply).let { Players(it) }
+
+    data class State(val playerStates: Players, val phase: Phase)
+
+    fun interface StateMover {
+        fun apply(game: Game): Game
+    }
+
+    sealed interface Phase {
+        enum class GamePhase : Phase {
+            START_SET_UP,
+            START_PLAYER_TURN,
+            GAME_OVER;
+        }
+
+        enum class SetUpPhase : Phase {
+            SHUFFLE_FATE_DECKS,
+            SHUFFLE_VILLAIN_DECKS,
+            DEAL_INITIAL_HANDS,
+            GIVE_INITIAL_POWER;
+        }
+
+        enum class PlayerPhase : Phase {
+            CHECK_PRE_TURN_WINNING_CONDITIONS,
+            CHECK_CARD_PRECONDITIONS,
+            MOVE_VILLAIN_MOVER,
+            CHECK_MID_TURN_WINNING_CONDITIONS,
+            TAKE_ACTIONS_OR_END_TAKE_ACTION_STEP,
+            DRAW_CARDS,
+            END_PLAYER_TURN;
+        }
+
+        enum class ActionPhase : Phase {
+            REVEAL_HAND,
+            REVEAL_VILLAIN_CARDS_FROM_DECK,
+            REVEAL_FATE_CARDS_FROM_DECK;
+        }
+    }
+
+    class Progresser {
+        fun progressGame(game: Game): Game {
+            return when (game.phase) {
+                Phase.GamePhase.START_SET_UP, is Phase.SetUpPhase -> SetupGame.apply(game)
+                Phase.GamePhase.START_PLAYER_TURN -> TakePlayerTurn.apply(game)
+                Phase.PlayerPhase.CHECK_PRE_TURN_WINNING_CONDITIONS -> TODO("")
+                Phase.PlayerPhase.END_PLAYER_TURN ->
+                    game.progress {
+                        it.copy(
+                            playerStates = game.currentState.playerStates.progressPlayers(),
+                            phase = Phase.GamePhase.START_PLAYER_TURN
+                        )
+                    }
+
+                Phase.GamePhase.GAME_OVER -> game
+                else -> error("${game.phase} unknown")
+            }
+        }
+    }
+
+    interface Player : StateMover {
         data class Username(val value: String)
+
+        val username: Username
+
+        override fun apply(game: Game): Game
+
+        fun duringAnotherPlayersTurn(): StateMover
+        fun duringThisPlayersTurn(): StateMover
 
         interface State {
             val player: Player
@@ -41,6 +110,7 @@ data class Game private constructor(val history: List<State>) {
 
             val villainCharacterName get() = boardState.villainCharacter.name
 
+            // TODO: Should this apply to Player States instead?
             fun progress(apply: (Board.State) -> Board.State): State
 
             data class Active(override val player: Player, override val boardState: Board.State) :
@@ -57,17 +127,12 @@ data class Game private constructor(val history: List<State>) {
             fun makeInactive() = if (this !is Inactive) Inactive(player, boardState) else this
         }
     }
-
-    data class State(val playerStates: List<Player.State>) {
-        fun interface Mover {
-            fun apply(game: Game): Game
-        }
-    }
 }
 
-fun List<Game.Player.State>.progressGame(game: Game) = game.progress(game.currentState.copy(playerStates = this))
+fun Players.progressGame(game: Game, phase: Game.Phase = game.phase) =
+    game.progress { it.copy(playerStates = this, phase = phase) }
 
-data class Players private constructor(
+data class Players internal constructor(
     private val value: List<Game.Player.State>
 ) : List<Game.Player.State> by value {
 
@@ -85,16 +150,19 @@ data class Players private constructor(
 
         private fun List<Game.Player.State>.shiftPlayersSoActiveIsFirst(): List<Game.Player.State> {
             val activePlayerIndex = this.findActivePlayerIndex()
-            return ((activePlayerIndex..this.toList().indices.last) + (0 until activePlayerIndex)).map {
+            return Players(((activePlayerIndex..this.toList().indices.last) + (0 until activePlayerIndex)).map {
                 this.toList()[it]
-            }
+            })
         }
 
         fun createPlayersFromList(players: List<Game.Player.State>, startingPlayerIndex: Int) =
-            createPlayers(players.markStartingPlayerAsActive(players[startingPlayerIndex]))
+            Players(createPlayers(players.markStartingPlayerAsActive(players[startingPlayerIndex])))
 
         private fun createPlayers(value: List<Game.Player.State>) = Players(value.shiftPlayersSoActiveIsFirst())
     }
+
+    fun progressPlayers(): Players =
+        Players(markStartingPlayerAsActive(mapIndexedNotNull { i, player -> if (i == 1) player else null }.single()).shiftPlayersSoActiveIsFirst())
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -111,5 +179,19 @@ data class Players private constructor(
 
     override fun toString(): String {
         return "Players(value=$value)"
+    }
+}
+
+abstract class AbstractPlayer : Game.Player {
+    final override fun apply(game: Game): Game {
+        val hiddenGame = game // TODO: Create a version of the game that the player would have access to
+        // Remove all fate and villain decks with hidden cards
+        // Remove all non-revealed hands
+        // ---- Maaaaybe this becomes its own class
+        return if (game.currentPlayerState.player == this) {
+            duringThisPlayersTurn().apply(hiddenGame)
+        } else {
+            duringAnotherPlayersTurn().apply(hiddenGame)
+        }
     }
 }

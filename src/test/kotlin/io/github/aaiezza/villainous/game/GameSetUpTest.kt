@@ -6,19 +6,19 @@ import io.github.aaiezza.villainous.Realm
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class GameTest {
+class GameSetUpTest {
     private lateinit var subject: Game
 
     @BeforeEach
     fun setUp() {
         subject = Game(
             listOf(
-                "Jafar".asVillainousPlayer("1".asUsername()),
-                "Maleficent".asVillainousPlayer("2".asUsername()),
-                "King Candy".asVillainousPlayer("3".asUsername()),
-                "Captain Hook".asVillainousPlayer("4".asUsername()),
-                "Queen of Hearts".asVillainousPlayer("5".asUsername()),
-                "Ursula".asVillainousPlayer("6".asUsername()),
+                "Jafar".asVillainousPlayer("1".asUsername(), ::RandomPlayer),
+                "Prince John".asVillainousPlayer("2".asUsername(), ::RandomPlayer),
+                "King Candy".asVillainousPlayer("3".asUsername(), ::RandomPlayer),
+                "Captain Hook".asVillainousPlayer("4".asUsername(), ::RandomPlayer),
+                "Queen of Hearts".asVillainousPlayer("5".asUsername(), ::RandomPlayer),
+                "Ursula".asVillainousPlayer("6".asUsername(), ::RandomPlayer),
             ), 1
         ).let { SetupGame.apply(it) }
     }

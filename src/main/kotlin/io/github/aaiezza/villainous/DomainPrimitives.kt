@@ -174,9 +174,7 @@ interface Card {
 fun CardCost(powerCost: Int) = Card.Cost.Known(Power(powerCost))
 
 data class Power(val value: Int)
-data class Strength(val value: Int) {
-    fun powerRequiredToVanquish() = Power(value)
-}
+data class Strength(val value: Int)
 
 interface VillainCard : Card {
     object Standard {
