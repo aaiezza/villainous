@@ -17,9 +17,6 @@ class GamePlayTest {
                 "Jafar".asVillainousPlayer("1".asUsername(), ::RandomPlayer),
                 "Prince John".asVillainousPlayer("2".asUsername(), ::RandomPlayer),
                 "King Candy".asVillainousPlayer("3".asUsername(), ::WinningPlayer),
-                "Captain Hook".asVillainousPlayer("4".asUsername(), ::RandomPlayer),
-                "Queen of Hearts".asVillainousPlayer("5".asUsername(), ::RandomPlayer),
-                "Ursula".asVillainousPlayer("6".asUsername(), ::RandomPlayer),
             ), 1
         )
 
@@ -31,9 +28,11 @@ class GamePlayTest {
         assertThat(subject.phase).isEqualTo(Game.Phase.GamePhase.START_SET_UP)
         val endGame = generateSequence(0 to subject) { (i, it) ->
             println("Step $i : ${it.phase}, ${it.currentPlayerState.boardState.villainCharacter.name}")
-            if(it.phase == Game.Phase.GamePhase.GAME_OVER) null
-            else i+1 to gameProgresser.progressGame(it)
+            if (it.phase == Game.Phase.GamePhase.GAME_OVER) null
+            else i + 1 to gameProgresser.progressGame(it)
         }.last().second
-        assertThat(endGame.phase)
+        assertThat(endGame.phase).isEqualTo(Game.Phase.GamePhase.GAME_OVER)
+
+        endGame.print()
     }
 }

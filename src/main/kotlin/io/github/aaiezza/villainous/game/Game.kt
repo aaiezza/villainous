@@ -28,7 +28,7 @@ data class Game private constructor(val history: List<State>) {
 
     fun progressPhaseOnly(phase: Phase) = progress { it.copy(phase = phase) }
 
-    fun progress(stateMover: (State) -> State = { it.copy(phase = phase) }): Game =
+    fun progress(stateMover: (State) -> State): Game =
         Game(history + stateMover(currentState))
 
     fun mapIndexedPlayers(apply: (Int, Player.State) -> Player.State) =
@@ -77,7 +77,7 @@ data class Game private constructor(val history: List<State>) {
     class Progresser {
         fun progressGame(game: Game): Game {
             return when (game.phase) {
-                Phase.GamePhase.START_SET_UP, is Phase.SetUpPhase -> SetupGame.apply(game)
+                Phase.GamePhase.START_SET_UP -> SetupGame.apply(game)
                 Phase.GamePhase.START_PLAYER_TURN -> TakePlayerTurn.apply(game)
                 Phase.PlayerPhase.CHECK_PRE_TURN_WINNING_CONDITIONS -> TODO("")
                 Phase.PlayerPhase.END_PLAYER_TURN ->
@@ -110,7 +110,7 @@ data class Game private constructor(val history: List<State>) {
 
             val villainCharacterName get() = boardState.villainCharacter.name
 
-            // TODO: Should this apply to Player States instead?
+            // TODO: Should this apply to Player States instead of Board.States?
             fun progress(apply: (Board.State) -> Board.State): State
 
             data class Active(override val player: Player, override val boardState: Board.State) :
@@ -194,4 +194,7 @@ abstract class AbstractPlayer : Game.Player {
             duringAnotherPlayersTurn().apply(hiddenGame)
         }
     }
+
+    fun findMyState(game: Game): Game.Player.State =
+        game.currentState.playerStates.single { it.player == this }
 }

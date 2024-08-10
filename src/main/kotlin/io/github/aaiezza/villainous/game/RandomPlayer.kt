@@ -37,7 +37,27 @@ class RandomPlayer(override val username: Game.Player.Username) : AbstractPlayer
         //   The alternative is to end with the GAME_OVER phase, and set the
         //   winning player somehow.
 
-        return Game.StateMover { it.progressPhaseOnly(Game.Phase.PlayerPhase.END_PLAYER_TURN) }
+
+
+        return Game.StateMover {
+            when(it.phase) {
+                Game.Phase.PlayerPhase.MOVE_VILLAIN_MOVER -> {
+                    val boardState = this.findMyState(it).boardState
+                    val locationToMoveTo = boardState.realm.filter {  location ->
+                        location !in boardState.lockedLocations && boardState.villainMoverLocation != location
+                    }
+                    // Choose from available locations
+                        .first() // TODO: Just choose the first thing
+
+                    it.mapPlayers { playerState ->
+                        if(playerState.player != this)
+                            playerState
+                        else Game.Player.State.Active(this, boardState.copy(villainMoverLocation = locationToMoveTo))
+                    }.progressGame(it, phase = Game.Phase.PlayerPhase.END_PLAYER_TURN)
+                }
+                else -> error("Unknown phase for player: ${it.phase}")
+            }
+        }
     }
 
 }
