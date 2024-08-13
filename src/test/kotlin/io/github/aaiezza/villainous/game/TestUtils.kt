@@ -14,13 +14,14 @@ fun Game.print(): Unit {
     println("Villainous Game")
     println()
     this.history.forEachIndexed { i, state ->
-        println(" ----- State $i ----- [${state.phase}]")
+        println(" ++++++ State $i ++++++ [${state.phase}]")
         state.playerStates.forEach { playerState ->
             with(playerState) {
-                println("${player.username.value} - Villain: ${boardState.villainCharacter.name.value} ${if (playerState is Game.Player.State.Active) " (Active)" else ""}")
-                println("Exapansion: ${boardState.villainCharacter.villainousExpansion.value}")
-                println("Objective: ${boardState.villainCharacter.objective.value}")
-                println("Board:\n")
+                println("    ${player.username.value} - Villain: ${boardState.villainCharacter.name.value} ${if (playerState is Game.Player.State.Active) " (Active)" else ""}")
+                println("    Expansion: ${boardState.villainCharacter.villainousExpansion.value}")
+                println("    Objective: ${boardState.villainCharacter.objective.value}")
+                println("\n    Board:")
+                print("    ")
                 boardState.realm.flatMap { it.actionSpaceSlots + " | " }
                     .filter { it is Realm.Location.ActionSpaceSlot.CoverableActionSpaceSlot || it is String }
                     .forEach {
@@ -31,6 +32,7 @@ fun Game.print(): Unit {
                         }
                     }
                 println()
+                print("    ")
                 boardState.realm.flatMap { it.actionSpaceSlots + " | " }
                     .filter { it is Realm.Location.ActionSpaceSlot.NotCoverableActionSpaceSlot || it is String }
                     .forEach {
@@ -40,10 +42,11 @@ fun Game.print(): Unit {
                                 "$prefix${it.actionSpace.actionName} _ "
                             )
 
-                            is String -> print("$prefix$it")
+                            is String -> print("    $prefix$it")
                         }
                     }
                 println()
+                print("    ")
                 boardState.realm.forEach {
                     val prefix = if (boardState.villainMoverLocation == it) "📍 " else ""
                     print("$prefix${it.name}")
@@ -61,15 +64,15 @@ fun Game.print(): Unit {
                 println()
                 println()
 
-                print("Power Tokens: ${boardState.powerTokens}")
-                println(" ✋ Hand Size: ${boardState.hand.size}${if (boardState.hand.isNotEmpty()) " [${boardState.hand[0].name.value}]" else ""}")
-                print("Villain Card Deck: ${boardState.villainDeck.size}")
+                print("    Power Tokens: ${boardState.powerTokens}")
+                print("  ✋ Hand Size: ${boardState.hand.size}${if (boardState.hand.isNotEmpty()) " [${boardState.hand[0].name.value}]" else ""}")
+                print("  Villain Card Deck: ${boardState.villainDeck.size}")
                 println(" 🃟 Villain Discard Pile: ${boardState.villainDiscardPile.size}")
-                print("Fate Card Deck: ${boardState.fateDeck.size}")
-                print(" 🃟 Fate Discard Pile: ${boardState.fateDiscardPile.size}")
-                println(" * Has Fate Token?: ${boardState.fateToken != null}")
+                print("    Fate Card Deck: ${boardState.fateDeck.size}")
+                print("  🃟 Fate Discard Pile: ${boardState.fateDiscardPile.size}")
+                println("  * Has Fate Token?: ${boardState.fateToken != null}")
 
-                println("\n    +++++++\n")
+                println("    +++++++\n")
             }
             println(" ----- -------- -----")
         }
